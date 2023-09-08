@@ -5,14 +5,17 @@ import { useNavigation } from '@react-navigation/native';
 import { SendVerifyClient } from "../api/requests";
 const SignUpPage = () => {
     const [email,setEmail] = useState("")
+    const [error,setError] = useState("")
     const navigator = useNavigation();
     const navigateBack = () => {
         navigator.navigate("LoginPage")
     }
     const navigateToVeriCode = async () => {
-        if(await SendVerifyClient({usedFor:1,phoneNumber:email})){
+      const result = await SendVerifyClient({usedFor:1,phoneNumber:email})
+        if(result.success){
           navigator.navigate("SetVerificationPage",{email});        
-        }
+        }else
+          setError(result.errorMsg)
            
     }
     
@@ -26,13 +29,14 @@ const SignUpPage = () => {
       <View style={styles.container}>
         <TouchableOpacity style={styles.backButton} onPress={navigateBack}>
             <Image
-                source={require('../../../assets/photos/back.png')} // Replace with your image file path
+                source={require('../../../assets/imgs/back.png')} // Replace with your image file path
             />
         </TouchableOpacity>
         <Text style={styles.signUpTitle}>Sign Up</Text>
         <View style={styles.inputContainer}>
           <Text style={styles.enterText}>Enter your email address</Text>
           <TextInput style={styles.emailInput} placeholder="Email" value={email} onChangeText={setEmail}/>
+          <Text style={styles.error}>{error}</Text>
           <TouchableOpacity style={styles.nextButton} onPress={navigateToVeriCode}>
             <Text style={styles.nextButtonText}>Next</Text>
           </TouchableOpacity>
@@ -78,6 +82,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginTop: 10,
+  },
+  error:{
+    fontSize:11,
+    textAlign:"center",
+    color:"red"
   },
   nextButton: {
     backgroundColor: "#0089FF",

@@ -8,6 +8,7 @@ const LoginWithVerificationPage = ({onLogin}) => {
   const [password,setPassword] = useState("");
   const [passwordHidden,setPasswordHidden] = useState(true);
   const [seconds,setSeconds] = useState(0)
+  const [error,setError] = useState("")
   const navigation = useNavigation();
   const navigateToLogin = () => {
     navigation.navigate('LoginPage'); 
@@ -19,21 +20,30 @@ const LoginWithVerificationPage = ({onLogin}) => {
     setEmail('');
   };
 
-  const handleSendVerification = () => {
+  const handleSendVerification = async () => {
     if(seconds == 0){
       setSeconds(60)
-      SendVerifyClient({usedFor:3,phoneNumber:email})
+      const result = await SendVerifyClient({usedFor:3,phoneNumber:email})
+      if(!result.success){
+        setError(result.errorMsg)
+      }
     }
         
   }
   const handleLogIn = () => {
-    navigateToLogin
+    navigateToLogin();
   }
   const handleSignIn = async () => {
-    if(await CheckVerifyClient({ phoneNumber: email, verifyCode: password })){
-      if(await LoginClient({password:"",phoneNumber:email,verifyCode:password,areaCode:"+86"})){
+    const result = await CheckVerifyClient({ phoneNumber: email, verifyCode: password });
+    if(result.success){
+      const result2 = await LoginClient({password:"",phoneNumber:email,verifyCode:password,areaCode:"+86"});
+      if(result2.success){
         onLogin(true)
+      }else{
+        setError(result2.errorMsg)
       }
+    }else{
+      setError(result.errorMsg)
     }
   }
   const handleSignUpPage = () => {
@@ -60,7 +70,7 @@ const LoginWithVerificationPage = ({onLogin}) => {
     >
       <View style={styles.container}>
         <View style={styles.logoContainer}>
-          {/* <Image source={require('./logo.png')} style={styles.logo} /> */}
+          <Image source={require('../../../assets/imgs/loginLogo.png')} style={styles.logo} />
         </View>
         <View>
           <Text style={styles.welcomeText}>Welcome to OpenIM</Text>
@@ -76,7 +86,7 @@ const LoginWithVerificationPage = ({onLogin}) => {
                 <TextInput  style={styles.emailTextInput} placeholder="Email" value={email} onChangeText={setEmail}/>
                 <TouchableOpacity style={styles.clearButton} onPress={handleClearEmail}>
                   <Image
-                    source={require('../../../assets/photos/clear.png')} // Replace with your image file path
+                    source={require('../../../assets/imgs/clear.png')} // Replace with your image file path
                   />
                 </TouchableOpacity>
               </View>
@@ -96,6 +106,7 @@ const LoginWithVerificationPage = ({onLogin}) => {
               </TouchableOpacity>
             </View>
           </View>
+          <Text style={styles.error}>{error}</Text>
           <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
             <Text style={styles.signInButtonText}>Sign In</Text>
           </TouchableOpacity>
@@ -218,6 +229,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginLeft:10,
     fontSize:11,
+  },
+  error:{
+    fontSize:11,
+    textAlign:"center",
+    color:"red"
   },
   signInButton: {
 

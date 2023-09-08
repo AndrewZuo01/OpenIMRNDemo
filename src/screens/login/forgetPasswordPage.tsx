@@ -8,7 +8,7 @@ const ForgetPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [countdownSeconds, setCountdownSeconds] = useState(0);
-
+  const [error,setError] = useState("")
   const navigator = useNavigation();
   const navigateToLogin = () => {
       navigator.navigate("LoginPage")
@@ -17,15 +17,21 @@ const ForgetPasswordPage = () => {
     setEmail('');
   };
 
-  const handleSendVerification = () => {
+  const handleSendVerification = async () => {
     if (countdownSeconds === 0) {
-      SendVerifyClient({usedFor:2,phoneNumber:email})
-      setCountdownSeconds(60);
+      const result = await SendVerifyClient({usedFor:2,phoneNumber:email})
+      if(result.success)
+        setCountdownSeconds(60);
+      else
+        setError(result.errorMsg)
     }
   };
   const handleSavePwd = async () => {
-    if(await CheckVerifyClient({ phoneNumber: email, verifyCode: password})){
+    const result = await CheckVerifyClient({ phoneNumber: email, verifyCode: password})
+    if(result.success){
       navigator.navigate("SetPasswordPage",{type:"resetPwd"})
+    }else{
+      setError(result.errorMsg)
     }
   }
   useEffect(() => {
@@ -50,7 +56,7 @@ const ForgetPasswordPage = () => {
       <View style={styles.container}>
         <TouchableOpacity style={styles.backButton} onPress={navigateToLogin}>
             <Image
-                source={require('../../../assets/photos/back.png')} 
+                source={require('../../../assets/imgs/back.png')} 
             />
         </TouchableOpacity>
         <View style={styles.signInText}>
@@ -64,7 +70,7 @@ const ForgetPasswordPage = () => {
                 <TextInput style={styles.emailTextInput} placeholder="Email" value={email} onChangeText={setEmail} />
                 <TouchableOpacity style={styles.clearButton} onPress={handleClearEmail}>
                   <Image
-                    source={require('../../../assets/photos/clear.png')} 
+                    source={require('../../../assets/imgs/clear.png')} 
                   />
                 </TouchableOpacity>
               </View>
@@ -79,6 +85,7 @@ const ForgetPasswordPage = () => {
               </TouchableOpacity>
             </View>
           </View>
+          <Text style={styles.error}>{error}</Text>
           <TouchableOpacity style={styles.signInButton} onPress={handleSavePwd}>
             <Text style={styles.signInButtonText}>Save</Text>
           </TouchableOpacity>
@@ -156,6 +163,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     borderWidth: 0,
+  },
+  error:{
+    fontSize:11,
+    textAlign:"center",
+    color:"red"
   },
   sendButtonContainer: {
     backgroundColor: '#0089FF',

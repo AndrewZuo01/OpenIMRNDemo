@@ -1,13 +1,13 @@
 import { Image, StyleSheet, Text, View } from "react-native";
+import Avatar from "./avatar";
 
 const NameCards = ({ item }) => {
   if (!item || !item.friendInfo) {
     return null; // Return null or a placeholder component if data is undefined
   }
-
   return (
     <View style={styles.contactItem}>
-      <Image style={styles.avatar} source={require("./ic_avatar_01.png")} />
+      <Avatar item={item.friendInfo} />
       <Text>{item.friendInfo.nickname}</Text>
     </View>
   );

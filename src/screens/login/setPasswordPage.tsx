@@ -9,9 +9,12 @@ import md5 from 'react-native-md5';
 import { LoginClient, ResetPassword, SignUpClient } from "../api/requests";
 
 const SetPasswordPage = (props) => {
+  const [name,setName] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [error,setError] = useState("")
   const [next, setNext] = useState(true);
+  
   const navigator = useNavigation();
   const navigateBack = () => {
     navigator.navigate("SignUpPage");
@@ -29,24 +32,30 @@ const SetPasswordPage = (props) => {
     console.log(props.route.params)
     try {
       if (props.route.params.type === "register") {
-        await SignUpClient({
+        const result = await SignUpClient({
+          nickname:name,
           phoneNumber: props.route.params.email,
           password: md5.hex_md5(newPassword),
           verifyCode: props.route.params.verifyCode,
         });
+        if(!result.success)
+          setError(result.errorMsg)
       }
     
       if (props.route.params.type === "resetPwd") {
-        await ResetPassword({
+        const result = await ResetPassword({
           phoneNumber: props.route.params.email,
           password: md5.hex_md5(newPassword),
           verifyCode: props.route.params.verifyCode,
         });
+        if(!result.success)
+          setError(result.errorMsg)
       }
-    
-      if (await LoginClient({ password: md5.hex_md5(newPassword), phoneNumber: props.route.params.email, verifyCode: "verify", areaCode: "+86" })) {
+      const result = await LoginClient({ password: md5.hex_md5(newPassword), phoneNumber: props.route.params.email, verifyCode: "verify", areaCode: "+86" })
+      if (result.success) {
         props.onLogin(true);
-        console.log("work!");
+      }else{
+        setError(result.errorMsg)
       }
     } catch (error) {
       console.error("Error during sign-up:", error);
@@ -64,11 +73,17 @@ const SetPasswordPage = (props) => {
       <View style={styles.container}>
         <TouchableOpacity style={styles.backButton} onPress={navigateBack}>
           <Image
-            source={require('../../../assets/photos/back.png')}
+            source={require('../../../assets/imgs/back.png')}
           />
         </TouchableOpacity>
-        <Text style={styles.signUpTitle}>Set password</Text>
+        <Text style={styles.signUpTitle}>Name</Text>
         <View style={styles.inputContainer}>
+          <Text style={styles.enterText}>Name</Text>
+          <TextInput
+            style={styles.digitInput}
+            value={name}
+            onChangeText={setName}
+          />
           <Text style={styles.enterText}>New Password</Text>
           <TextInput
             style={styles.digitInput}
@@ -81,6 +96,7 @@ const SetPasswordPage = (props) => {
             value={repeatPassword}
             onChangeText={setRepeatPassword}
           />
+          <Text style={styles.error}>{error}</Text>
           <TouchableOpacity style={buttonStyle} disabled={!next} onPress={() => handleSignUp()}>
             <Text style={styles.nextButtonText}>Next</Text>
           </TouchableOpacity>
@@ -127,6 +143,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     fontSize: 18,
     marginRight: 10,
+  },
+  error:{
+    fontSize:11,
+    textAlign:"center",
+    color:"red"
   },
   nextButton: {
     backgroundColor: "#0089FF",

@@ -8,17 +8,21 @@ const SetVerificationPage = (props) => {
   const digitInputs = Array.from({ length: totalDigits }, (_, index) => index);
   const digitRefs = useRef([]);
   const [digits, setDigits] = useState(Array(totalDigits).fill(''));
-
+  const [error,setError] = useState("")
   const navigator = useNavigation();
   const navigateBack = () => {
     navigator.navigate("SignUpPage");
 }
 const navigateToSetPwd = async () => {
-    if(await CheckVerifyClient({ phoneNumber: props.route.params.email, verifyCode: digits.join("") }))
+  const result = await CheckVerifyClient({ phoneNumber: props.route.params.email, verifyCode: digits.join("") })
+    if(result.success)
         navigator.navigate("SetPasswordPage",{email:props.route.params.email,verifyCode:digits.join(""),type:"register"});
-    else
-        setDigits(['','','','','','',''])
-}
+    else{
+      setDigits(['','','','','','',''])
+      setError(result.errorMsg)
+      }
+    }
+        
   const handleDigitChange = (index, value) => {
     const newDigits = [...digits];
     newDigits[index] = value;
@@ -48,7 +52,7 @@ const navigateToSetPwd = async () => {
       <View style={styles.container}>
         <TouchableOpacity style={styles.backButton} onPress={navigateBack}>
           <Image
-            source={require('../../../assets/photos/back.png')} // Replace with your image file path
+            source={require('../../../assets/imgs/back.png')} // Replace with your image file path
           />
         </TouchableOpacity>
         <Text style={styles.signUpTitle}>Sign Up</Text>
@@ -74,7 +78,7 @@ const navigateToSetPwd = async () => {
                 <Text style={styles.didnotReceivedCodeButtonText}>Resend Code</Text>
             </TouchableOpacity>
           </View>
-          
+          <Text style={styles.error}>{error}</Text>
           <TouchableOpacity style={styles.nextButton} onPress={()=>navigateToSetPwd()}>
             <Text style={styles.nextButtonText}>Next</Text>
           </TouchableOpacity>
@@ -146,6 +150,11 @@ const styles = StyleSheet.create({
   },
   didnotReceivedCodeButtonText:{
     color: '#0089FF',
+  },
+  error:{
+    fontSize:11,
+    textAlign:"center",
+    color:"red"
   },
   nextButton: {
     backgroundColor: "#0089FF",

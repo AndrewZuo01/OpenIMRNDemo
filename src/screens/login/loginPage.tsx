@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet,Platform} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import md5 from 'react-native-md5';
 import { LoginClient } from '../api/requests';
+import { GetLoginStatus } from '../api/openimsdk';
 
 const LoginPage = ({onLogin}) => {
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [passwordHidden,setPasswordHidden] = useState(true);
+  const [error,setError] = useState("");
   const navigation = useNavigation();
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const result = await GetLoginStatus();
+      if (result.status === 3) {
+        onLogin(true);
+      }
+    };
+  
+    checkLoginStatus();
+  }, []);
   
   const navigateToForgetPwd = () => {
     navigation.navigate('ForgetPasswordPage');
@@ -41,8 +53,12 @@ const LoginPage = ({onLogin}) => {
     navigateToSignUp();
   }
   const handleSignIn = async () => {
-    if(await LoginClient({password:md5.hex_md5(password),phoneNumber:email,verifyCode:"verify",areaCode:"+86"})){
+    const result = await LoginClient({password:md5.hex_md5(password),phoneNumber:email,verifyCode:"verify",areaCode:"+86"});
+    if(result.success){
+      setError("")
       onLogin(true)
+    }else{
+      setError(result.errorMsg)
     }
   };
   
@@ -55,7 +71,7 @@ const LoginPage = ({onLogin}) => {
     >
       <View style={styles.container}>
         <View style={styles.logoContainer}>
-          {/* <Image source={require('./logo.png')} style={styles.logo} /> */}
+          <Image source={require('../../../assets/imgs/loginLogo.png')} style={styles.logo} />
         </View>
         <View>
           <Text style={styles.welcomeText}>Welcome to OpenIM</Text>
@@ -71,7 +87,7 @@ const LoginPage = ({onLogin}) => {
                 <TextInput  style={styles.emailTextInput} placeholder="Email" value={email} onChangeText={setEmail}/>
                 <TouchableOpacity style={styles.clearButton} onPress={handleClearEmail}>
                   <Image
-                    source={require('../../../assets/photos/clear.png')} // Replace with your image file path
+                    source={require('../../../assets/imgs/clear.png')} // Replace with your image file path
                   />
                 </TouchableOpacity>
               </View>
@@ -83,12 +99,12 @@ const LoginPage = ({onLogin}) => {
               <TextInput  style={styles.passwordTextInput} placeholder="Password" secureTextEntry={passwordHidden} value={password} onChangeText={setPassword}/>
               <TouchableOpacity style={styles.clearButton} onPress={handleClearPassword}>
                 <Image
-                  source={require('../../../assets/photos/clear.png')} // Replace with your image file path
+                  source={require('../../../assets/imgs/clear.png')} // Replace with your image file path
                 />
               </TouchableOpacity>
               <TouchableOpacity onPress={handleShowPassword}>
                 <Image
-                  source={require('../../../assets/photos/visibility.png')} // Replace with your image file path
+                  source={require('../../../assets/imgs/visibility.png')} // Replace with your image file path
                 />
               </TouchableOpacity>
             </View>
@@ -101,9 +117,11 @@ const LoginPage = ({onLogin}) => {
               </TouchableOpacity>
             </View>
           </View>
+          <Text style={styles.error}>{error}</Text>
           <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
             <Text style={styles.signInButtonText}>Sign In</Text>
           </TouchableOpacity>
+
         </View>
         <View style={styles.signUpText}>
           <Text style={{fontSize:11,fontStyle: 'italic',}}>Don't have an account yet?</Text>
@@ -216,6 +234,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginLeft:10,
     fontSize:11,
+  },
+  error:{
+    fontSize:11,
+    textAlign:"center",
+    color:"red"
   },
   signInButton: {
 

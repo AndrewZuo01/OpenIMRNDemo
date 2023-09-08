@@ -5,63 +5,59 @@ import { LoginIM } from "./openimsdk";
 import { criticallyDampedSpringCalculations } from "react-native-reanimated/lib/typescript/reanimated2/animation/springUtils";
 
 export const LoginClient = async (params) => {
-    let platform = 1;
-    if (Platform.OS === 'android') {
-      platform = 2; // Android
-    } else if (Platform.OS === 'ios') {
-      platform = 1;
-    }
+  let platform = 1;
+  if (Platform.OS === 'android') {
+    platform = 2; // Android
+  } else if (Platform.OS === 'ios') {
+    platform = 1;
+  }
   
-    try {
-      const url = USER_URL + "/account/login";
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'operationID': '123',
-        },
-        body: JSON.stringify({
-          ...params,
-          platform:platform,
-          areaCode: "+86",
-        }),
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        if(data.errCode!=0){
-            console.error('Data ', data.errDlt);
-            return false
-        }
-        else{
-            const { chatToken, imToken, userID } = data.data;
-            console.log(data)
-
-            try {
-            // Set key-value pairs
-            await AsyncStorage.setItem('chatToken', chatToken);
-            await AsyncStorage.setItem('imToken', imToken);
-            await AsyncStorage.setItem('userID', userID);
-                
-            console.log('User Data chatToken, imToken, userID saved successfully');
-           
-            await LoginIM()
-            return true
-            } catch (error) {
-            console.error('Error saving chatToken, imToken, userID:', error);
-            }
-            return false
-        }
+  try {
+    const url = USER_URL + "/account/login";
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'operationID': '123',
+      },
+      body: JSON.stringify({
+        ...params,
+        platform: platform,
+        areaCode: "+86",
+      }),
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.errCode !== 0) {
+        return { success: false, errorMsg: data.errDlt };
       } else {
-        // Handle errors or non-200 responses here
-        console.error("Login failed");
-        return false
+        const { chatToken, imToken, userID } = data.data;
+        try {
+          // Set key-value pairs
+          await AsyncStorage.setItem('chatToken', chatToken);
+          await AsyncStorage.setItem('imToken', imToken);
+          await AsyncStorage.setItem('userID', userID);
+          const result = await LoginIM()
+          if(result.success)
+            return { success: true, errorMsg: "" };
+          else
+            return {success:false,errorMsg:result.errorMsg};
+
+        } catch (error) {
+          return { success: false, errorMsg: "Local storage error" };
+        }
       }
-    } catch (error) {
-      // Handle network or other errors here
-      console.error("An error occurred:", error);
+    } else {
+      // Handle errors or non-200 responses here
+      return { success: false, errorMsg: "Request failed" };
     }
-}
+  } catch (error) {
+    // Handle network or other errors here
+    return { success: false, errorMsg: "Network error" };
+  }
+};
+
 
 export const SignUpClient = async (params) =>  {
     
@@ -103,6 +99,7 @@ export const SignUpClient = async (params) =>  {
         console.log(data)
         if(data.errCode!=0){
             console.error('Data ', data.errDlt);
+            return { success: false, errorMsg: data.errDlt };
         }
         else{
             const { chatToken, imToken, userID } = data.data;
@@ -113,18 +110,26 @@ export const SignUpClient = async (params) =>  {
             await AsyncStorage.setItem('userID', userID);
                 
             console.log('User Data chatToken, imToken, userID saved successfully');
-            await LoginIM()
+            const result = await LoginIM()
+            if(result.success)
+              return { success: true, errorMsg: "" };
+            else
+              return {success:false,errorMsg: result.errorMsg};
+            
             } catch (error) {
             console.error('Error saving chatToken, imToken, userID:', error);
+            return {success:false,errorMsg: "Local storage error"};
             }
         }
       } else {
         // Handle errors or non-200 responses here
         console.error("Login failed");
+        return {success:false,errorMsg: "Reuqest error"};
       }
     } catch (error) {
       // Handle network or other errors here
       console.error("An error occurred:", error);
+      return {success:false,errorMsg: "Network error"};
     }
 }
 export const SendVerifyClient = async (params) => {
@@ -155,21 +160,22 @@ export const SendVerifyClient = async (params) => {
         console.log(data)
         if(data.errCode!=0){
             console.error('Data ', data.errDlt);
-            return false
+            return {success:false,errorMsg: data.errDlt};
         }
         else{
             console.log(data)
             console.log("Code sent successfully");
-            return true
+            return {success:true,errorMsg: ""};
         }
       } else {
         // Handle errors or non-200 responses here
         console.error("Code sent failed");
-        return false
+        return {success:false,errorMsg:"Request error"};
       }
     } catch (error) {
       // Handle network or other errors here
       console.error("An error occurred:", error);
+      return {success:false,errorMsg:"Network error"};
     }
 }
 export const CheckVerifyClient = async (params) => {
@@ -199,22 +205,23 @@ export const CheckVerifyClient = async (params) => {
         const data = await response.json();
         if(data.errCode!=0){
             console.error('Data ', data.errDlt);
-            return false
+            return {success:false,errorMsg:data.errDlt};
         }
         else{
             console.log(data)
             console.log("Code verify successfully");
-            return true
+            return {success:true,errorMsg:""};
         }
         
       } else {
         // Handle errors or non-200 responses here
         console.error("Code verify failed");
-        return false;
+        return {success:false,errorMsg:"Request failed"};
       }
     } catch (error) {
       // Handle network or other errors here
       console.error("An error occurred:", error);
+      return {success:false,errorMsg:"Network failed"};
     }
 }
 export const ResetPassword = async (params) => {
@@ -244,21 +251,22 @@ export const ResetPassword = async (params) => {
       const data = await response.json();
       if(data.errCode!=0){
           console.error('Data ', data.errDlt);
-          return false
+          return {success:false,errorMsg:data.errDlt};
       }
       else{
           console.log(data)
           console.log("Code verify successfully");
-          return true
+          return {success:true,errorMsg:""};
       }
       
     } else {
       // Handle errors or non-200 responses here
       console.error("Code verify failed");
-      return false;
+      return {success:true,errorMsg:"Request failed"};
     }
   } catch (error) {
     // Handle network or other errors here
     console.error("An error occurred:", error);
+    return {success:true,errorMsg:"Network error"};
   }
 }

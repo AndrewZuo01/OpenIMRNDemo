@@ -8,10 +8,10 @@ import {
   FlatList,
   SectionList,
   ScrollView,
-  Modal,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import Modal from 'react-native-modal';
 import NameCards from '../../components/nameCards';
 import { GetFriendList, LogoutIM } from '../api/openimsdk';
 import API from '../api/typings.d'
@@ -58,7 +58,7 @@ const ContactListPage = () => {
             "friendInfo":
             {
               "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "New Friend", "nickname": "New Friend", "operatorUserID": "4458656648",
-              "ownerUserID": "6960562805", "remark": "", "userID": "create"
+              "ownerUserID": "6960562805", "remark": "", "userID": "newFriend"
             },
             "publicInfo": null,
             offset:0
@@ -67,7 +67,7 @@ const ContactListPage = () => {
             "friendInfo":
             {
               "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "New Group", "nickname": "New Group", "operatorUserID": "4458656648",
-              "ownerUserID": "6960562805", "remark": "", "userID": "create"
+              "ownerUserID": "6960562805", "remark": "", "userID": "newGroup"
             },
             "publicInfo": null,
             offset:0
@@ -82,7 +82,7 @@ const ContactListPage = () => {
             "friendInfo":
             {
               "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "My Groups", "nickname": "My Groups", "operatorUserID": "4458656648",
-              "ownerUserID": "6960562805", "remark": "", "userID": "create"
+              "ownerUserID": "6960562805", "remark": "", "userID": "myGroup"
             },
             "publicInfo": null,
             offset: 2, 
@@ -174,7 +174,7 @@ const ContactListPage = () => {
 
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios'? 'padding':undefined}>
+    <KeyboardAvoidingView style={styles.container} behavior='height'keyboardVerticalOffset={Platform.OS==='android'? -60 : -70}>
       <View style={styles.header}>
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.button} onPress={LogoutIM}>
@@ -238,15 +238,16 @@ const ContactListPage = () => {
         ))}
       </ScrollView>
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isDrawerVisible}
-        onRequestClose={closeDrawer}
+        isVisible={isDrawerVisible}
+        onBackdropPress={closeDrawer}
+        backdropOpacity={0.5}
+        backdropColor='black'
+        
       >
         <SearchDrawer
-          visible={isDrawerVisible}
-          onClose={closeDrawer}
-          onSearch={""}
+          // visible={isDrawerVisible}
+          // onClose={closeDrawer}
+          // onSearch={""}
           ref={popupSearchInputRef} 
         />
       </Modal>

@@ -1,21 +1,18 @@
 // SearchDrawer.tsx
 
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
+
 const windowHeight = Dimensions.get('window').height;
 const SearchDrawer = React.forwardRef(({ visible, onClose, onSearch }, ref) => {
   return (
-    <View style={styles.drawerContainer}>
+    <KeyboardAvoidingView style={styles.drawerContainer} behavior='height'keyboardVerticalOffset={Platform.OS==='android'? -60 : -70}> 
       <TextInput
         style={styles.searchInput}
         placeholder="Search..."
         onChangeText={onSearch}
       />
-      {/* Add other content for the drawer */}
-      <TouchableOpacity onPress={onClose}>
-        <Text>Close</Text>
-      </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 });
 
@@ -25,7 +22,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: windowHeight * 0.7,
+    height: windowHeight * 0.6,
     backgroundColor: 'white',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,

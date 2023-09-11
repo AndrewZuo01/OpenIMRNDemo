@@ -18,6 +18,7 @@ import { useState, useEffect } from 'react';
 import BottomTabBar from './BottomTabBar';
 import { GetLoginStatus, LoginIM } from './src/screens/api/openimsdk';
 import { LoginClient } from './src/screens/api/requests';
+import FriendRequestPage from './src/screens/contacts/friendRequestPage';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -28,7 +29,7 @@ export default function App() {
     });
     OpenIMEmitter.addListener('onConnectFailed', (v) => {
       console.log(v);
-     });
+    });
   }, []);
 
   useEffect(() => {
@@ -58,13 +59,13 @@ export default function App() {
     };
     const checkLogin = async () => {
       const status = (await GetLoginStatus()).status;
-      if(status==3)
+      if (status == 3)
         LoginIM()
     }
     // Call the Init function when the component mounts
     Init();
     checkLogin();
-    
+
   }, []); // The empty dependency array ensures that this effect runs once on mount
 
   const handleLogin = (loggedIn: boolean | ((prevState: boolean) => boolean)) => {
@@ -93,9 +94,9 @@ export default function App() {
             />
             <Stack.Screen
               name="SetPasswordPage"
-              options={{ headerShown: false}}
+              options={{ headerShown: false }}
             >
-              {props=><SetPasswordPage {...props} onLogin={handleLogin} />}
+              {props => <SetPasswordPage {...props} onLogin={handleLogin} />}
             </Stack.Screen>
             <Stack.Screen
               name="SetVerificationPage"
@@ -109,13 +110,21 @@ export default function App() {
             />
           </>
         ) : (
-          <Stack.Screen
-            name="Home"
-            component={BottomTabBar}
-            options={{ headerShown: false }}
-          />
+          <>
+            <Stack.Screen
+              name="Home"
+              component={BottomTabBar}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Friends"
+              component={FriendRequestPage}
+              options={{ headerShown: false }}
+            />
+          </>
         )}
       </Stack.Navigator>
+
     </NavigationContainer>
   );
 }

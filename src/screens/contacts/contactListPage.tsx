@@ -35,7 +35,6 @@ const ContactListPage = () => {
 
         // Group contacts by first character of their names, recognizing non-alphabet characters
         const groupedContacts = groupContactsByFirstCharacter(data);
-        console.log(groupedContacts[0].data)
         setContactSections([{
           title: '',
           data: [{

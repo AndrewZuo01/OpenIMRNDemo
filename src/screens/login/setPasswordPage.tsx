@@ -37,6 +37,7 @@ const SetPasswordPage = (props) => {
           phoneNumber: props.route.params.email,
           password: md5.hex_md5(newPassword),
           verifyCode: props.route.params.verifyCode,
+          autoLogin:true 
         });
         if(!result.success)
           setError(result.errorMsg)
@@ -51,7 +52,7 @@ const SetPasswordPage = (props) => {
         if(!result.success)
           setError(result.errorMsg)
       }
-      const result = await LoginClient({ password: md5.hex_md5(newPassword), phoneNumber: props.route.params.email, verifyCode: "verify", areaCode: "+86" })
+      const result = await LoginClient({ password: md5.hex_md5(newPassword), phoneNumber: props.route.params.email, verifyCode: "verify", areaCode: "+86"})
       if (result.success) {
         props.onLogin(true);
       }else{

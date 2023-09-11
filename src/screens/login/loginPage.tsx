@@ -5,13 +5,16 @@ import { useNavigation } from '@react-navigation/native';
 import md5 from 'react-native-md5';
 import { LoginClient } from '../api/requests';
 import { GetLoginStatus } from '../api/openimsdk';
-
-const LoginPage = ({onLogin}) => {
+import { NativeStackNavigationProp } from '@react-navigation/native-stack/lib/typescript/src/types';
+interface LoginPageProps{
+  onLogin: (value:boolean) => void;
+}
+const LoginPage:React.FC<LoginPageProps> = ({onLogin}) => {
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [passwordHidden,setPasswordHidden] = useState(true);
   const [error,setError] = useState("");
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   useEffect(() => {
     const checkLoginStatus = async () => {
       const result = await GetLoginStatus();

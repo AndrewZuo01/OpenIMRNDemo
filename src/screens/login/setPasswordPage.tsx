@@ -6,19 +6,32 @@ import { USER_URL } from "../../config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import OpenIMSDKRN from "open-im-sdk-rn";
 import md5 from 'react-native-md5';
-import { LoginClient, ResetPassword, SignUpClient } from "../api/requests";
+import { LoginClient, ResetPasswordClient, SignUpClient } from "../api/requests";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack/lib/typescript/src/types";
+interface SetPasswordPageProps {
+  // props: {
+    route: {
+      params: {
+        type: string;
+        email: any;
+        verifyCode: any;
+      };
+    };
+  // }
+  onLogin: (loggedIn: boolean) => void;
+}
 
-const SetPasswordPage = (props) => {
-  const [name,setName] = useState("");
+const SetPasswordPage: React.FC<SetPasswordPageProps> = ({ route, onLogin }) => {
+  const [name, setName] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [error,setError] = useState("")
+  const [error, setError] = useState("")
   const [next, setNext] = useState(true);
-  
-  const navigator = useNavigation();
+  console.log(route)
+  const navigator = useNavigation<NativeStackNavigationProp<any>>();
   const navigateBack = () => {
     navigator.navigate("SignUpPage");
-}
+  }
   useEffect(() => {
     if (newPassword === repeatPassword) {
       setNext(true);
@@ -29,40 +42,40 @@ const SetPasswordPage = (props) => {
 
   const buttonStyle = next ? styles.nextButton : styles.nextButtonDisabled;
   const handleSignUp = async () => {
-    console.log(props.route.params)
+    console.log(route.params)
     try {
-      if (props.route.params.type === "register") {
+      if (route.params.type === "register") {
         const result = await SignUpClient({
-          nickname:name,
-          phoneNumber: props.route.params.email,
+          nickname: name,
+          phoneNumber: route.params.email,
           password: md5.hex_md5(newPassword),
-          verifyCode: props.route.params.verifyCode,
-          autoLogin:true 
+          verifyCode: route.params.verifyCode,
+          autoLogin: true
         });
-        if(!result.success)
+        if (!result.success)
           setError(result.errorMsg)
       }
-    
-      if (props.route.params.type === "resetPwd") {
-        const result = await ResetPassword({
-          phoneNumber: props.route.params.email,
+
+      if (route.params.type === "resetPwd") {
+        const result = await ResetPasswordClient({
+          phoneNumber: route.params.email,
           password: md5.hex_md5(newPassword),
-          verifyCode: props.route.params.verifyCode,
+          verifyCode: route.params.verifyCode,
         });
-        if(!result.success)
+        if (!result.success)
           setError(result.errorMsg)
       }
-      const result = await LoginClient({ password: md5.hex_md5(newPassword), phoneNumber: props.route.params.email, verifyCode: "verify", areaCode: "+86"})
+      const result = await LoginClient({ password: md5.hex_md5(newPassword), phoneNumber: route.params.email, verifyCode: "verify", areaCode: "+86" })
       if (result.success) {
-        props.onLogin(true);
-      }else{
+        onLogin(true);
+      } else {
         setError(result.errorMsg)
       }
     } catch (error) {
       console.error("Error during sign-up:", error);
     }
-    
-      
+
+
   }
   return (
     <LinearGradient
@@ -145,10 +158,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginRight: 10,
   },
-  error:{
-    fontSize:11,
-    textAlign:"center",
-    color:"red"
+  error: {
+    fontSize: 11,
+    textAlign: "center",
+    color: "red"
   },
   nextButton: {
     backgroundColor: "#0089FF",
@@ -162,13 +175,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  nextButtonDisabled:{
+  nextButtonDisabled: {
     backgroundColor: "#0089FF20",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
     marginTop: 60,
-  },  
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',

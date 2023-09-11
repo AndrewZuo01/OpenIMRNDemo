@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { CheckVerifyClient, ResetPassword, SendVerifyClient } from '../api/requests';
+import { CheckVerifyClient, SendVerifyClient } from '../api/requests';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const ForgetPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [countdownSeconds, setCountdownSeconds] = useState(0);
   const [error,setError] = useState("")
-  const navigator = useNavigation();
+  const navigator = useNavigation<NativeStackNavigationProp<any>>();
   const navigateToLogin = () => {
       navigator.navigate("LoginPage")
   }
@@ -29,7 +30,7 @@ const ForgetPasswordPage = () => {
   const handleSavePwd = async () => {
     const result = await CheckVerifyClient({ phoneNumber: email, verifyCode: password})
     if(result.success){
-      navigator.navigate("SetPasswordPage",{type:"resetPwd"})
+      navigator.navigate("SetPasswordPage",{type:"resetPwd"});
     }else{
       setError(result.errorMsg)
     }

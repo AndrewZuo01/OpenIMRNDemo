@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LoginIM } from "./openimsdk";
 import { criticallyDampedSpringCalculations } from "react-native-reanimated/lib/typescript/reanimated2/animation/springUtils";
 
-export const LoginClient = async (params) => {
+export const LoginClient = async (params: { password: string; phoneNumber: any; verifyCode: string; areaCode: string; }) => {
   let platform = 1;
   if (Platform.OS === 'android') {
     platform = 2; // Android
@@ -59,7 +59,7 @@ export const LoginClient = async (params) => {
 };
 
 
-export const SignUpClient = async (params) =>  {
+export const SignUpClient = async (params: { nickname?: string; phoneNumber: any; password: any; verifyCode?: any; autoLogin?: boolean; }) =>  {
     
     let platform = 1;
     if (Platform.OS === 'android') {
@@ -132,7 +132,7 @@ export const SignUpClient = async (params) =>  {
       return {success:false,errorMsg: "Network error"};
     }
 }
-export const SendVerifyClient = async (params) => {
+export const SendVerifyClient = async (params: { usedFor: number; phoneNumber: any; }) => {
     let platform = 1;
     if (Platform.OS === 'android') {
       platform = 2; // Android
@@ -178,7 +178,7 @@ export const SendVerifyClient = async (params) => {
       return {success:false,errorMsg:"Network error"};
     }
 }
-export const CheckVerifyClient = async (params) => {
+export const CheckVerifyClient = async (params: { phoneNumber: any; verifyCode: string; }) => {
     let platform = 1;
     if (Platform.OS === 'android') {
       platform = 2; // Android
@@ -224,7 +224,7 @@ export const CheckVerifyClient = async (params) => {
       return {success:false,errorMsg:"Network failed"};
     }
 }
-export const ResetPassword = async (params) => {
+export const ResetPasswordClient = async (params: { phoneNumber: any; password: string; verifyCode: any; }) => {
   let platform = 1;
   if (Platform.OS === 'android') {
     platform = 2; // Android

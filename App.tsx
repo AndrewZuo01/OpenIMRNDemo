@@ -67,7 +67,7 @@ export default function App() {
     
   }, []); // The empty dependency array ensures that this effect runs once on mount
 
-  const handleLogin = (loggedIn) => {
+  const handleLogin = (loggedIn: boolean | ((prevState: boolean) => boolean)) => {
     setIsLoggedIn(loggedIn);
   };
 

@@ -21,7 +21,7 @@ export const LoginIM = async () => {
 };
 export const LogoutIM= async () => {
     try {
-        const data = await OpenIMSDKRN.login("1232211737");
+        const data = await OpenIMSDKRN.logout("1232211737");
         console.log("logout",data);
         return { success: true, errorMsg: "" };
     }

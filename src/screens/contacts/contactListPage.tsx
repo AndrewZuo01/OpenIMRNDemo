@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, RefObject } from 'react';
 import {
   View,
   Text,
@@ -8,33 +8,47 @@ import {
   FlatList,
   SectionList,
   ScrollView,
+  Modal,
 } from 'react-native';
 import NameCards from '../../components/nameCards';
-import { GetFriendList } from '../api/openimsdk';
-
+import { GetFriendList, LogoutIM } from '../api/openimsdk';
+import API from '../api/typings.d'
+import SearchDrawer from '../../components/searchDrawer';
 const ContactListPage = () => {
   const [search, setSearch] = useState('');
-  const [alphabetHints, setAlphabetHints] = useState([]);
-  const [contactSections, setContactSections] = useState<{ title: string, data: any }[]>([]);
+  const [alphabetHints, setAlphabetHints] = useState<string[]>([]);
+  const [contactSections, setContactSections] = useState<{ title: string, data: API.API.Friend.FriendData[] }[]>([]);
   const [scrollEnabled, setScrollEnabled] = useState(true); // Add scrollEnabled state
-  const sectionListRef = useRef(null);
-
+  const sectionListRef:RefObject<SectionList> = useRef(null);
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const popupSearchInputRef = useRef<TextInput | null>(null);
+   
   useEffect(() => {
     const fetchData = async () => {
       try {
         let rawData = await GetFriendList();
         let data = JSON.parse(rawData.data);
-        data = data.sort((a, b) => a.friendInfo.nickname.localeCompare(b.friendInfo.nickname));
+        data = data.sort((a:API.API.Friend.FriendData, b:API.API.Friend.FriendData) => a.friendInfo.nickname.localeCompare(b.friendInfo.nickname));
         // Extract unique first characters from friend names to create alphabet hints
-        const hints = Array.from(new Set(data.map((item) => {
+        const hints:string[] = Array.from(new Set(data.map((item:API.API.Friend.FriendData) => {
           const firstChar = item.friendInfo.nickname.charAt(0).toUpperCase();
           return firstChar.match(/[A-Z]/) ? firstChar : '#'; // Use '#' for non-alphabet characters
         })));
-
         setAlphabetHints(hints);
 
         // Group contacts by first character of their names, recognizing non-alphabet characters
         const groupedContacts = groupContactsByFirstCharacter(data);
+
+        let totalOffset = 0;
+        const sectionsWithOffset = groupedContacts.map((section) => {
+          const sectionWithOffset = {
+            ...section,
+            offset: totalOffset,
+          };
+          totalOffset += section.data.length; // Increase offset by the number of items in the section
+          return sectionWithOffset;
+        });
+
         setContactSections([{
           title: '',
           data: [{
@@ -44,7 +58,8 @@ const ContactListPage = () => {
               "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "New Friend", "nickname": "New Friend", "operatorUserID": "4458656648",
               "ownerUserID": "6960562805", "remark": "", "userID": "create"
             },
-            "publicInfo": null
+            "publicInfo": null,
+            offset:0
           }, {
             "blackInfo": null,
             "friendInfo":
@@ -52,9 +67,12 @@ const ContactListPage = () => {
               "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "New Group", "nickname": "New Group", "operatorUserID": "4458656648",
               "ownerUserID": "6960562805", "remark": "", "userID": "create"
             },
-            "publicInfo": null
+            "publicInfo": null,
+            offset:0
           },
-          ]
+          
+          ],
+          
         }, {
           title: ' ',
           data: [{
@@ -64,10 +82,13 @@ const ContactListPage = () => {
               "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "My Groups", "nickname": "My Groups", "operatorUserID": "4458656648",
               "ownerUserID": "6960562805", "remark": "", "userID": "create"
             },
-            "publicInfo": null
-          }]
+            "publicInfo": null,
+            offset: 2, 
+
+          }],
+          
         }
-          , ...groupedContacts]);
+          , ...sectionsWithOffset]);
       } catch (error) {
         console.error('Error getFriendList:', error); // Log the error
       }
@@ -77,13 +98,9 @@ const ContactListPage = () => {
     fetchData();
   }, []);
 
-  const updateSearch = (text) => {
-    setSearch(text);
-    // You can implement search functionality here
-  };
 
-  const groupContactsByFirstCharacter = (contacts) => {
-    const grouped = {};
+  const groupContactsByFirstCharacter = (contacts:API.API.Friend.FriendData[]) => {
+    const grouped: { [key: string]: API.API.Friend.FriendData[] } = {};
     let hasNonAlphabet = false;
 
     contacts.forEach((contact) => {
@@ -121,8 +138,7 @@ const ContactListPage = () => {
     return sections;
   };
 
-  const scrollToSection = (sectionIndex) => {
-    console.log("index", sectionIndex)
+  const scrollToSection = (sectionIndex:number) => {
     if (sectionListRef.current) {
       sectionListRef.current.scrollToLocation({
         sectionIndex,
@@ -131,7 +147,7 @@ const ContactListPage = () => {
     }
   };
 
-  const handleHintItemPress = (index) => {
+  const handleHintItemPress = (index:number) => {
     // Disable scrolling when hint item is pressed
     setScrollEnabled(false);
     scrollToSection(index);
@@ -142,14 +158,24 @@ const ContactListPage = () => {
     }, 1000); // 1000 milliseconds delay
   };
 
+  const openDrawer = () => {
+    setIsDrawerVisible(true);
+    if (popupSearchInputRef.current) {
+      popupSearchInputRef.current.focus();
+    }
+  };
+  
 
+  const closeDrawer = () => {
+    setIsDrawerVisible(false);
+  };
 
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.topBar}>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={LogoutIM}>
             <Text>Edit</Text>
           </TouchableOpacity>
           <Text style={styles.title}>Contacts</Text>
@@ -157,14 +183,13 @@ const ContactListPage = () => {
             <Text>Add Friend</Text>
           </TouchableOpacity>
         </View>
-        <TextInput
+        <TouchableOpacity 
           style={styles.searchBar}
-          placeholder="Search"
-          onChangeText={updateSearch}
-          value={search}
-        />
+          onPress={openDrawer}>
+            <Text>Search</Text>
+        </TouchableOpacity>
       </View>
-      <SectionList nestedScrollEnabled
+      <SectionList 
         ref={sectionListRef}
         sections={contactSections}
         keyExtractor={(item, index) =>
@@ -172,6 +197,7 @@ const ContactListPage = () => {
             ? item.friendInfo.userID + index.toString()
             : index.toString()
         }
+        bounces={false}
         renderItem={({ item }) => <NameCards item={item} />}
         renderSectionHeader={({ section }) => {
           if (section.title !== '')
@@ -209,6 +235,19 @@ const ContactListPage = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      <Modal
+        animationType="slide"
+        transparent={!isDrawerVisible}
+        visible={isDrawerVisible}
+        onRequestClose={closeDrawer}
+      >
+        <SearchDrawer
+          visible={isDrawerVisible}
+          onClose={closeDrawer}
+          onSearch={""}
+          ref={popupSearchInputRef} 
+        />
+      </Modal>
     </View>
   );
 };

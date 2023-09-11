@@ -3,13 +3,14 @@ import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from "reac
 import LinearGradient from "react-native-linear-gradient";
 import { useNavigation } from '@react-navigation/native';
 import { SendVerifyClient, CheckVerifyClient } from "../api/requests";
-const SetVerificationPage = (props) => {
+import { NativeStackNavigationProp } from "@react-navigation/native-stack/lib/typescript/src/types";
+const SetVerificationPage = (props: { route: { params: { email: string }; }; }) => {
   const totalDigits = 6;
   const digitInputs = Array.from({ length: totalDigits }, (_, index) => index);
-  const digitRefs = useRef([]);
+  const digitRefs = useRef<TextInput[]>([]);
   const [digits, setDigits] = useState(Array(totalDigits).fill(''));
   const [error,setError] = useState("")
-  const navigator = useNavigation();
+  const navigator = useNavigation<NativeStackNavigationProp<any>>();
   const navigateBack = () => {
     navigator.navigate("SignUpPage");
 }
@@ -23,7 +24,7 @@ const navigateToSetPwd = async () => {
       }
     }
         
-  const handleDigitChange = (index, value) => {
+  const handleDigitChange = (index: number, value: string) => {
     const newDigits = [...digits];
     newDigits[index] = value;
 

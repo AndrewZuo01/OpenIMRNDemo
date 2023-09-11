@@ -3,13 +3,17 @@ import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'reac
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { CheckVerifyClient, LoginClient, SendVerifyClient } from '../api/requests';
-const LoginWithVerificationPage = ({onLogin}) => {
+import { NativeStackNavigationProp } from '@react-navigation/native-stack/lib/typescript/src/types';
+interface LoginWithVerificationPageProps{
+  onLogin: (value:boolean) => void;
+}
+const LoginWithVerificationPage:React.FC<LoginWithVerificationPageProps> = ({onLogin}) => {
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [passwordHidden,setPasswordHidden] = useState(true);
   const [seconds,setSeconds] = useState(0)
   const [error,setError] = useState("")
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const navigateToLogin = () => {
     navigation.navigate('LoginPage'); 
   }

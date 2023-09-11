@@ -9,6 +9,8 @@ import {
   SectionList,
   ScrollView,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import NameCards from '../../components/nameCards';
 import { GetFriendList, LogoutIM } from '../api/openimsdk';
@@ -172,7 +174,7 @@ const ContactListPage = () => {
 
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios'? 'padding':undefined}>
       <View style={styles.header}>
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.button} onPress={LogoutIM}>
@@ -237,7 +239,7 @@ const ContactListPage = () => {
       </ScrollView>
       <Modal
         animationType="slide"
-        transparent={!isDrawerVisible}
+        transparent={true}
         visible={isDrawerVisible}
         onRequestClose={closeDrawer}
       >
@@ -248,7 +250,7 @@ const ContactListPage = () => {
           ref={popupSearchInputRef} 
         />
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -256,6 +258,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+    
   },
   header: {
     backgroundColor: '#F6F6F6FF',

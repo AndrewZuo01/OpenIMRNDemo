@@ -1,8 +1,8 @@
 // SearchDrawer.tsx
 
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
+const windowHeight = Dimensions.get('window').height;
 const SearchDrawer = React.forwardRef(({ visible, onClose, onSearch }, ref) => {
   return (
     <View style={styles.drawerContainer}>
@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    height: windowHeight * 0.7,
     backgroundColor: 'white',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,

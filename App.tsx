@@ -16,6 +16,8 @@ import OpenIMSDKRN, { OpenIMEmitter } from 'open-im-sdk-rn';
 import RNFS from 'react-native-fs';
 import { useState, useEffect } from 'react';
 import BottomTabBar from './BottomTabBar';
+import { GetLoginStatus, LoginIM } from './src/screens/api/openimsdk';
+import { LoginClient } from './src/screens/api/requests';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,9 +56,15 @@ export default function App() {
         console.error('Error initializing SDK:', error); // Log the error
       }
     };
-
+    const checkLogin = async () => {
+      const status = (await GetLoginStatus()).status;
+      if(status==3)
+        LoginIM()
+    }
     // Call the Init function when the component mounts
     Init();
+    checkLogin();
+    
   }, []); // The empty dependency array ensures that this effect runs once on mount
 
   const handleLogin = (loggedIn) => {

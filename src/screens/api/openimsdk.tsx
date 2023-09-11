@@ -52,3 +52,14 @@ export const GetAllConversationList = async () => {
         return { success: false, errorMsg: "getAllConversationList  failed",data:[]};
     }
 }
+export const GetFriendList = async () => {
+    try {
+        const data = await OpenIMSDKRN.getFriendList("12837");
+        console.log("GetFriendList",data);
+        return { success: true, errorMsg: "", data:data};
+    }
+    catch (error) {
+        console.error('Error GetFriendList:', error); // Log the error
+        return { success: false, errorMsg: "GetFriendList  failed",data:[]};
+    }
+}

@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import NameCards from '../../components/nameCards';
-import OpenIMSDKRN from 'open-im-sdk-rn';
+import { GetFriendList } from '../api/openimsdk';
 
 const ContactListPage = () => {
   const [search, setSearch] = useState('');
@@ -22,7 +22,8 @@ const ContactListPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let data = JSON.parse(await OpenIMSDKRN.getFriendList("12345"));
+        let rawData = await GetFriendList();
+        let data = JSON.parse(rawData.data);
         data = data.sort((a, b) => a.friendInfo.nickname.localeCompare(b.friendInfo.nickname));
         // Extract unique first characters from friend names to create alphabet hints
         const hints = Array.from(new Set(data.map((item) => {
@@ -45,7 +46,7 @@ const ContactListPage = () => {
               "ownerUserID": "6960562805", "remark": "", "userID": "create"
             },
             "publicInfo": null
-          },{
+          }, {
             "blackInfo": null,
             "friendInfo":
             {
@@ -55,9 +56,9 @@ const ContactListPage = () => {
             "publicInfo": null
           },
           ]
-        },{
+        }, {
           title: ' ',
-          data:[{
+          data: [{
             "blackInfo": null,
             "friendInfo":
             {
@@ -67,7 +68,7 @@ const ContactListPage = () => {
             "publicInfo": null
           }]
         }
-        , ...groupedContacts]);
+          , ...groupedContacts]);
       } catch (error) {
         console.error('Error getFriendList:', error); // Log the error
       }
@@ -164,37 +165,37 @@ const ContactListPage = () => {
           value={search}
         />
       </View>
-        <SectionList nestedScrollEnabled
-          ref={sectionListRef}
-          sections={contactSections}
-          keyExtractor={(item, index) =>
-            item.friendInfo && item.friendInfo.userID
-              ? item.friendInfo.userID + index.toString()
-              : index.toString()
+      <SectionList nestedScrollEnabled
+        ref={sectionListRef}
+        sections={contactSections}
+        keyExtractor={(item, index) =>
+          item.friendInfo && item.friendInfo.userID
+            ? item.friendInfo.userID + index.toString()
+            : index.toString()
+        }
+        renderItem={({ item }) => <NameCards item={item} />}
+        renderSectionHeader={({ section }) => {
+          if (section.title !== '')
+            return <Text style={styles.sectionHeader}>{section.title}</Text>
+          else
+            return null
+        }
+        }
+        onScroll={(event) => {
+          const offsetY = event.nativeEvent.contentOffset.y;
+          const sectionIndex = contactSections.findIndex(
+            (section) => offsetY >= section.offset
+          );
+          if (sectionIndex !== -1) {
+            // You can customize how you want to display the hint here
+
+            const hint = contactSections[sectionIndex].title;
+            console.log(`Scrolling to section: ${hint}`);
           }
-          renderItem={({ item }) => <NameCards item={item} />}
-          renderSectionHeader={({ section }) => {
-            if(section.title!=='')
-              return <Text style={styles.sectionHeader}>{section.title}</Text>
-            else  
-              return null
-            }
-          }
-          onScroll={(event) => {
-            const offsetY = event.nativeEvent.contentOffset.y;
-            const sectionIndex = contactSections.findIndex(
-              (section) => offsetY >= section.offset
-            );
-            if (sectionIndex !== -1 ) {
-              // You can customize how you want to display the hint here
-              
-              const hint = contactSections[sectionIndex].title;
-              console.log(`Scrolling to section: ${hint}`);
-            }
-          }}
-          // Disable scrolling if scrollEnabled is false
-          scrollEnabled={scrollEnabled}
-        />
+        }}
+        // Disable scrolling if scrollEnabled is false
+        scrollEnabled={scrollEnabled}
+      />
       <ScrollView
         style={styles.hintContainer}
         contentContainerStyle={styles.hintContentContainer} // Apply contentContainerStyle

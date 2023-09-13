@@ -36,8 +36,9 @@ const ContactListPage = () => {
           const firstChar = item.friendInfo.nickname.charAt(0).toUpperCase();
           return firstChar.match(/[A-Z]/) ? firstChar : '#'; // Use '#' for non-alphabet characters
         })));
+        const modifiedHints = hints.splice(hints.indexOf("#"),1)
+        hints.push(modifiedHints[0])
         setAlphabetHints(hints);
-
         // Group contacts by first character of their names, recognizing non-alphabet characters
         const groupedContacts = groupContactsByFirstCharacter(data);
 
@@ -174,7 +175,7 @@ const ContactListPage = () => {
 
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior='height'keyboardVerticalOffset={Platform.OS==='android'? -60 : -70}>
+    <KeyboardAvoidingView style={styles.container} behavior='height'  keyboardVerticalOffset={Platform.OS==='android'? -60 : -70}>
       <View style={styles.header}>
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.button} onPress={LogoutIM}>

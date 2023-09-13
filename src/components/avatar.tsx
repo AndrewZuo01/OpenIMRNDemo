@@ -1,7 +1,7 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import images from "./defaultAvatarHelper";
 
-const Avatar = ({ item }) => {
+const Avatar = ({ item }:{item:any}) => {
   if (!item) {
     return null; // Return null or a placeholder component if data is undefined
   }

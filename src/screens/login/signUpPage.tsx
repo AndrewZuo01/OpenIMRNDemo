@@ -3,10 +3,11 @@ import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Platform } 
 import LinearGradient from "react-native-linear-gradient";
 import { useNavigation } from '@react-navigation/native';
 import { SendVerifyClient } from "../api/requests";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 const SignUpPage = () => {
     const [email,setEmail] = useState("")
     const [error,setError] = useState("")
-    const navigator = useNavigation();
+    const navigator = useNavigation<NativeStackNavigationProp<any>>();
     const navigateBack = () => {
         navigator.navigate("LoginPage")
     }

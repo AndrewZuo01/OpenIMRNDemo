@@ -3,7 +3,7 @@ import Avatar from "./avatar";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-const NameCards = ({ item }) => {
+const NameCards = ({ item }:{item:any}) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   if (!item)
     return null
@@ -16,6 +16,9 @@ const NameCards = ({ item }) => {
     if (item.handleResult == -1)
       result = <Text>rejected</Text>
     if (item.handleResult == 0) {
+      const handleViewPress = () => {
+        navigation.navigate("FriendRequests",{item})
+      }
       return (
         <View style={[styles.contactItem, { flexDirection: "row", justifyContent: "space-between", alignItems: "center" }]}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -24,7 +27,7 @@ const NameCards = ({ item }) => {
               <Text>{item.fromNickname}</Text>
             </View>
           </View>
-          <TouchableOpacity style={{ backgroundColor: "blue", paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 }}>
+          <TouchableOpacity style={{ backgroundColor: "blue", paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 }} onPress={handleViewPress}>
             <Text style={{ color: "white" }}>View</Text>
           </TouchableOpacity>
         </View>
@@ -68,10 +71,10 @@ const NameCards = ({ item }) => {
   }
 
   return (
-    <View style={styles.contactItem}>
+    <TouchableOpacity style={styles.contactItem}>
       <Avatar item={item.friendInfo} />
       <Text>{item.friendInfo.nickname}</Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 

@@ -2,9 +2,10 @@ import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "r
 import { GetAllConversationList } from "../api/openimsdk";
 import { useEffect, useState } from "react";
 import ConversationCard from "../../components/conversationCard";
+import { API } from "../api/typings";
 
 const ChatPage = () => {
-    const [conversationList, setConversationList] = useState([]);
+    const [conversationList, setConversationList] = useState<API.Chat.ChatCard[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -20,8 +21,7 @@ const ChatPage = () => {
 
         fetchData();
     }, []);
-    const renderConversationItem = ({ item }) => {
-        console.log(item)
+    const renderConversationItem = ({ item }:{item:API.Chat.ChatCard}) => {
         return (
             <View style={{}}>
                 <ConversationCard item={item}></ConversationCard>
@@ -45,7 +45,7 @@ const ChatPage = () => {
             </View>
             <FlatList
                 data={conversationList}
-                // keyExtractor={(item) => item.conversationID.toString()}
+                keyExtractor={(item) => item.conversationID.toString()}
                 renderItem={renderConversationItem}
             />
         </View>

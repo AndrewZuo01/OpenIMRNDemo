@@ -1,11 +1,20 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Avatar from "./avatar";
 import { useState, useEffect } from "react";
+import { API } from "../screens/api/typings";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import ChatRoom from "../screens/chats/chatRoom";
+import { GetAdvancedHistoryMessageListReverse } from "../screens/api/openimsdk";
 
-const ConversationCard = ({ item }) => {
+const ConversationCard = ({ item }:{item:API.Chat.ChatCard}) => {
+    
     const [showMsg, setShowMsg] = useState("");
     const [showMsgTime, setShowMsgTime] = useState("");
-
+    const navigation = useNavigation<NativeStackNavigationProp<any>>();
+    const handleConversation = async () =>  {
+        navigation.navigate('ChatRoom',{conversationID:item.conversationID})
+    }
     useEffect(() => {
         if (item) {
             const lastestMsgJson = JSON.parse(item.latestMsg);
@@ -34,10 +43,13 @@ const ConversationCard = ({ item }) => {
             const currentHours = currentTime.getHours();
             const currrentMinutes = currentTime.getMinutes();
             const currentSeconds = currentTime.getSeconds();
+
+            const formattedHours = String(hours).padStart(2,"0")
+            const formattedMinutes = String(minutes).padStart(2,"0")
             // Format the date and time as a string
             let formattedDate = "";
             if (currentYear == year && currentMonth == month && currentDay == day)
-                formattedDate = `${hours}:${minutes}`
+                formattedDate = `${formattedHours}:${formattedMinutes}`
             else if (currentYear == year && currentMonth == month && currentDay == day + 1)
                 formattedDate = `Yesterday`
             else
@@ -51,7 +63,7 @@ const ConversationCard = ({ item }) => {
     }
 
     return (
-        <View style={styles.contactItem}>
+        <TouchableOpacity style={styles.contactItem} onPress={handleConversation}>
             <Avatar item={item} />
             <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -66,13 +78,9 @@ const ConversationCard = ({ item }) => {
                             <Text style={{ color: "white" }}>{item.unreadCount}</Text>
                         </View>
                     )}
-
-
-
                 </View>
-
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 

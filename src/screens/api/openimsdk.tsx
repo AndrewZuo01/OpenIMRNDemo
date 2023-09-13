@@ -74,3 +74,58 @@ export const GetFriendApplicationListAsRecipient = async () => {
         return { success: false, errorMsg: "GetFriendApplicationListAsRecipient  failed", data: [] };
     }
 }
+export const AcceptFriendApplication = async (options: { toUserID: any; handleMsg: string; }) => {
+    try {
+        const data = await OpenIMSDKRN.acceptFriendApplication(options,"012219")
+        console.log("AcceptFriendApplication",data)
+        return { success: true, errorMsg: "", data: data };
+    } 
+    catch (error) {
+        console.error('Error AcceptFriendApplication:', error); // Log the error
+        return { success: false, errorMsg: "AcceptFriendApplication  failed", data: [] };
+    }
+}
+export const RefuseFriendApplication = async (options: { toUserID: any; handleMsg: string; }) => {
+    try {
+        const data = await OpenIMSDKRN.refuseFriendApplication(options,"01221119")
+        console.log("RefuseFriendApplication",data)
+        return { success: true, errorMsg: "", data: data };
+    } 
+    catch (error) {
+        console.error('Error RefuseFriendApplication:', error); // Log the error
+        return { success: false, errorMsg: "RefuseFriendApplication  failed", data: [] };
+    }
+}
+export const GetAdvancedHistoryMessageListReverse = async (options:{lastMinSeq: number; count: number; startClientMsgID: string; conversationID: string;}) => {
+    try {
+        const data = await OpenIMSDKRN.getAdvancedHistoryMessageListReverse(options,"01221119")
+        console.log("GetAdvancedHistoryMessageListReverse",data)
+        return { success: true, errorMsg: "", data: data };
+    } 
+    catch (error) {
+        console.error('Error GetAdvancedHistoryMessageListReverse:', error); // Log the error
+        return { success: false, errorMsg: "GetAdvancedHistoryMessageListReverse  failed", data: [] };
+    }
+}
+export const GetUsersInfo = async (userIDList:string[]) => {
+    try {
+        const data = await OpenIMSDKRN.getUsersInfo(userIDList,"012211129")
+        console.log("GetUsersInfo",data)
+        return { success: true, errorMsg: "", data: data };
+    } 
+    catch (error) {
+        console.error('Error GetUsersInfo:', error); // Log the error
+        return { success: false, errorMsg: "GetUsersInfo  failed", data: [] };
+    }
+}
+export const GetSelfInfo = async () => {
+    try {
+        const data = await OpenIMSDKRN.getSelfInfo("012211199")
+        console.log("GetSelfInfo",data)
+        return { success: true, errorMsg: "", data: data };
+    } 
+    catch (error) {
+        console.error('Error GetSelfInfo:', error); // Log the error
+        return { success: false, errorMsg: "GetSelfInfo  failed", data: [] };
+    }
+}

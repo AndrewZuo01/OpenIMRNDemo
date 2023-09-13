@@ -19,6 +19,8 @@ import BottomTabBar from './BottomTabBar';
 import { GetLoginStatus, LoginIM } from './src/screens/api/openimsdk';
 import { LoginClient } from './src/screens/api/requests';
 import FriendRequestPage from './src/screens/contacts/friendRequestPage';
+import FriendRequestVerifyPage from './src/screens/contacts/friendRequestVerifyPage';
+import ChatRoom from './src/screens/chats/chatRoom';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -119,6 +121,16 @@ export default function App() {
             <Stack.Screen
               name="Friends"
               component={FriendRequestPage}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="FriendRequests"
+              component={FriendRequestVerifyPage}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ChatRoom"
+              component={ChatRoom}
               options={{ headerShown: false }}
             />
           </>

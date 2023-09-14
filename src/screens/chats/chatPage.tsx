@@ -3,25 +3,14 @@ import { GetAllConversationList } from "../api/openimsdk";
 import { useEffect, useState } from "react";
 import ConversationCard from "../../components/conversationCard";
 import { API } from "../api/typings";
+import { useMessageStore } from "../../../store/message";
+import { useConversationStore } from "../../../store/conversation";
+import { ConversationItem } from "../../../store/types/entity";
 
 const ChatPage = () => {
-    const [conversationList, setConversationList] = useState<API.Chat.ChatCard[]>([]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const result = await GetAllConversationList();
-                const resultJSON = JSON.parse(result.data);
-                setConversationList(resultJSON);
-                console.log(result);
-            } catch (error) {
-                console.error("An error occurred while fetching data:", error);
-            }
-        };
-
-        fetchData();
-    }, []);
-    const renderConversationItem = ({ item }:{item:API.Chat.ChatCard}) => {
+    const rawData = useConversationStore((state) => state.conversationList);
+    
+    const renderConversationItem = ({item} ) => {
         return (
             <View style={{}}>
                 <ConversationCard item={item}></ConversationCard>
@@ -44,7 +33,7 @@ const ChatPage = () => {
 
             </View>
             <FlatList
-                data={conversationList}
+                data={rawData}
                 keyExtractor={(item) => item.conversationID.toString()}
                 renderItem={renderConversationItem}
             />

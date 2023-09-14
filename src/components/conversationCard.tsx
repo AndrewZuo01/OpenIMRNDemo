@@ -6,19 +6,19 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import ChatRoom from "../screens/chats/chatRoom";
 import { GetAdvancedHistoryMessageListReverse } from "../screens/api/openimsdk";
+import { ConversationItem } from "../../store/types/entity";
 
-const ConversationCard = ({ item }:{item:API.Chat.ChatCard}) => {
+const ConversationCard = ({ item }:{item:ConversationItem}) => {
     
     const [showMsg, setShowMsg] = useState("");
     const [showMsgTime, setShowMsgTime] = useState("");
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
     const handleConversation = async () =>  {
-        navigation.navigate('ChatRoom',{conversationID:item.conversationID})
+        navigation.navigate('ChatRoom',{item})
     }
     useEffect(() => {
         if (item) {
             const lastestMsgJson = JSON.parse(item.latestMsg);
-            console.log(lastestMsgJson.contentType);
             if (lastestMsgJson.contentType === 101) {
                 setShowMsg(lastestMsgJson.textElem.content);
             } else if (lastestMsgJson.contentType === 1201) {

@@ -120,12 +120,22 @@ export const GetUsersInfo = async (userIDList:string[]) => {
 }
 export const GetSelfInfo = async () => {
     try {
-        const data = await OpenIMSDKRN.getSelfInfo("012211199")
+        const data = await OpenIMSDKRN.getSelfUserInfo("012211199")
         console.log("GetSelfInfo",data)
         return { success: true, errorMsg: "", data: data };
     } 
     catch (error) {
         console.error('Error GetSelfInfo:', error); // Log the error
         return { success: false, errorMsg: "GetSelfInfo  failed", data: [] };
+    }
+}
+
+export const SendMessage = async (options) => {
+    try {
+        const data = await OpenIMSDKRN.sendMessage(options,"01342199")
+        return data
+    } 
+    catch (error) {
+        console.error('Error GetSelfInfo:', error); 
     }
 }

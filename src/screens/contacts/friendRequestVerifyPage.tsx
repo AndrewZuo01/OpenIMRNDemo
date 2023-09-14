@@ -6,33 +6,32 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 
 const FriendRequestVerifyPage = (props: { route: { params: { item: any; }; }; }) => {
-    const navigator = useNavigation<NativeStackNavigationProp<any>>();
-    console.log("here:",props.route.params.item)
-    const friendRequestInfo = props.route.params.item
-    const friendInfoWrapper = {
-        nickname: friendRequestInfo.fromNickname,
-        faceURL: friendRequestInfo.fromFaceURL
-      }
-    const onhandleAccept = () => {
-        const options= {
-            toUserID: friendRequestInfo.fromUserID,
-            handleMsg: 'ok, i agree',
-        }
-        AcceptFriendApplication(options)
-        navigator.navigate("Friends")
+  const navigator = useNavigation<NativeStackNavigationProp<any>>();
+  const friendRequestInfo = props.route.params.item
+  const friendInfoWrapper = {
+    nickname: friendRequestInfo.fromNickname,
+    faceURL: friendRequestInfo.fromFaceURL
+  }
+  const onhandleAccept = () => {
+    const options = {
+      toUserID: friendRequestInfo.fromUserID,
+      handleMsg: 'ok, i agree',
     }
-    const onhandleReject= () => {
-        const options= {
-            toUserID: friendRequestInfo.fromUserID,
-            handleMsg: 'reject',
-        }
-        RefuseFriendApplication(options)
-        navigator.navigate("Friends")
+    AcceptFriendApplication(options)
+    navigator.navigate("Friends")
+  }
+  const onhandleReject = () => {
+    const options = {
+      toUserID: friendRequestInfo.fromUserID,
+      handleMsg: 'reject',
     }
+    RefuseFriendApplication(options)
+    navigator.navigate("Friends")
+  }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={()=>navigator.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigator.goBack()}>
           <Image source={require("../../../assets/imgs/back.png")} />
         </TouchableOpacity>
         <Text style={styles.title}>New Friend</Text>
@@ -106,7 +105,7 @@ const styles = StyleSheet.create({
   bodyBottom: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop:50,
+    marginTop: 50,
   },
   buttonAccept: {
     flex: 1,
@@ -119,7 +118,7 @@ const styles = StyleSheet.create({
   },
   buttonReject: {
     flex: 1,
-    backgroundColor: "red", 
+    backgroundColor: "red",
     padding: 10,
     borderRadius: 5,
     marginLeft: 8,

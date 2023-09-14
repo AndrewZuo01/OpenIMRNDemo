@@ -5,41 +5,39 @@ import NameCards from "../../components/nameCards";
 import { GetFriendApplicationListAsRecipient } from "../api/openimsdk";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
-import  API  from "../api/typings";
+import API from "../api/typings";
+import { useContactStore } from "../../../store/contact";
 
 const FriendRequestPage = () => {
     const [friends, setFriends] = useState<API.API.Friend.FriendRequest[]>([]);
     const navigator = useNavigation<NativeStackNavigationProp<any>>();
-    useEffect(() => {
-        const initFriends = async () => {
-            const g = await GetFriendApplicationListAsRecipient();
-
-            if (g.success) {
-                setFriends(JSON.parse(g.data));
-            }
-        };
-        initFriends();
-    }, []);
-
+    const recvFriendApplicationList = useContactStore(
+        (state) => state.recvFriendApplicationList,
+    );
+    const sendFriendApplicationList = useContactStore(
+        (state) => state.sendFriendApplicationList,
+    );
+    const applicationList = [...recvFriendApplicationList,...sendFriendApplicationList]
+    applicationList.sort((a, b) => b.createTime - a.createTime);
+        
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={()=>navigator.goBack()}>
-                <Image source={require("../../../assets/imgs/back.png")} />
+                <TouchableOpacity style={styles.backButton} onPress={() => navigator.goBack()}>
+                    <Image source={require("../../../assets/imgs/back.png")} />
                 </TouchableOpacity>
                 <Text style={styles.title}>New Friend</Text>
                 <View></View>
             </View>
-            {/* <NameCards item={undefined} /> */}
             <Text style={styles.friendApplicationText}>Friends Application</Text>
             <FlatList
-                data={friends}
-                renderItem={({ item }) => {
+                data={applicationList}
+                renderItem={( {item} ) => {
                     return (
                         <NameCards item={item} />
                     )
                 }}
-            keyExtractor={(item) => item.createTime.toString()} // Use a unique key
+                // keyExtractor={(item) => item.createTime.toString()} // Use a unique key
             />
         </View>
     );
@@ -58,8 +56,8 @@ const styles = StyleSheet.create({
     backButton: {
     },
     title: {
-      fontSize: 18,
-      fontWeight: "bold",
+        fontSize: 18,
+        fontWeight: "bold",
     },
     headerText: {
         fontSize: 20,

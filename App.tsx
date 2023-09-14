@@ -1,5 +1,5 @@
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 // Create a stack navigator
@@ -21,18 +21,13 @@ import { LoginClient } from './src/screens/api/requests';
 import FriendRequestPage from './src/screens/contacts/friendRequestPage';
 import FriendRequestVerifyPage from './src/screens/contacts/friendRequestVerifyPage';
 import ChatRoom from './src/screens/chats/chatRoom';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { initStore, useGlobalEvent } from './store/useGlobalEvent';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  useEffect(() => {
-    OpenIMEmitter.addListener('onConnectSuccess', (v) => {
-      console.log('connect success:::');
-      console.log(v);
-    });
-    OpenIMEmitter.addListener('onConnectFailed', (v) => {
-      console.log(v);
-    });
-  }, []);
+  
+  useGlobalEvent()
 
   useEffect(() => {
     let platform = 1;
@@ -54,18 +49,22 @@ export default function App() {
       try {
         const opid = "123456";
         const result = await OpenIMSDKRN.initSDK(config, opid);
-        console.log(result); // Success message
+
       } catch (error) {
         console.error('Error initializing SDK:', error); // Log the error
       }
     };
     const checkLogin = async () => {
       const status = (await GetLoginStatus()).status;
-      if (status == 3)
-        LoginIM()
+      if (status == 3){
+        setIsLoggedIn(true)
+        initStore()
+      }
+        
     }
     // Call the Init function when the component mounts
     Init();
+    
     checkLogin();
 
   }, []); // The empty dependency array ensures that this effect runs once on mount

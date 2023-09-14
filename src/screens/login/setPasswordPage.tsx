@@ -8,6 +8,7 @@ import OpenIMSDKRN from "open-im-sdk-rn";
 import md5 from 'react-native-md5';
 import { LoginClient, ResetPasswordClient, SignUpClient } from "../api/requests";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack/lib/typescript/src/types";
+import { initStore } from "../../../store/useGlobalEvent";
 interface SetPasswordPageProps {
   // props: {
     route: {
@@ -27,7 +28,6 @@ const SetPasswordPage: React.FC<SetPasswordPageProps> = ({ route, onLogin }) => 
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState("")
   const [next, setNext] = useState(true);
-  console.log(route)
   const navigator = useNavigation<NativeStackNavigationProp<any>>();
   const navigateBack = () => {
     navigator.navigate("SignUpPage");
@@ -42,7 +42,6 @@ const SetPasswordPage: React.FC<SetPasswordPageProps> = ({ route, onLogin }) => 
 
   const buttonStyle = next ? styles.nextButton : styles.nextButtonDisabled;
   const handleSignUp = async () => {
-    console.log(route.params)
     try {
       if (route.params.type === "register") {
         const result = await SignUpClient({
@@ -68,6 +67,7 @@ const SetPasswordPage: React.FC<SetPasswordPageProps> = ({ route, onLogin }) => 
       const result = await LoginClient({ password: md5.hex_md5(newPassword), phoneNumber: route.params.email, verifyCode: "verify", areaCode: "+86" })
       if (result.success) {
         onLogin(true);
+        initStore()
       } else {
         setError(result.errorMsg)
       }

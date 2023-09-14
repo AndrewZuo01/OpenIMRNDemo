@@ -2,19 +2,21 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Avatar from "../../components/avatar";
 import TextChatCard from "./chatCards/textChatCard";
-import { GetAdvancedHistoryMessageListReverse, SendMessage } from "../api/openimsdk";
+import { GetAdvancedHistoryMessageListReverse, GetSelfInfo, SendMessage } from "../api/openimsdk";
 import { API } from "../api/typings";
 import { useMessageStore } from "../../../store/message";
 import { useConversationStore } from "../../../store/conversation";
 import { ConversationItem } from "../../../store/types/entity";
 import { FlatList } from "react-native-gesture-handler";
+import OpenIMSDKRN from "open-im-sdk-rn";
 
 const ChatRoom = (conversation) => {
-  const { updateCurrentConversation } = useConversationStore.getState();
-  updateCurrentConversation(conversation.route.params.item);
+  const updateCurrentConversation  = useConversationStore((state) => state.updateCurrentConversation)
+  const currentConversation = useConversationStore((state) => state.currentConversation)
 
   const { getHistoryMessageListByReq } = useMessageStore.getState();
   useEffect(() => {
+    updateCurrentConversation(conversation.route.params.item);
     getHistoryMessageListByReq();
   }, []);
 
@@ -24,15 +26,36 @@ const ChatRoom = (conversation) => {
     name: "John Doe",
     onlineStatus: "Online",
   };
-
+  const pushNewMessage = useMessageStore((state) => state.pushNewMessage);
+  const updateOneMessage = useMessageStore((state) => state.updateOneMessage);
   const [inputMessage, setInputMessage] = useState(""); // State to hold the input message
-
   // Function to handle sending a message
-  const sendMessage = () => {
+  const sendMessage = async () => {
     // Add your logic to send the message here
-    const options = {}
-    SendMessage(options)
-    console.log("Sending message:", inputMessage);
+    let text;
+    try {
+      const data = await OpenIMSDKRN.createTextMessage(inputMessage, "289893")
+
+      text = data;
+    }catch (error) {
+      console.error('Error CreateTextMsg:', error); // Log the error
+    }
+      
+    const offlinePushInfo = {
+      title: 'you have a new message',
+      desc: 'new message',
+      ex: '',
+      iOSPushSound: '+1',
+      iOSBadgeCount: true,
+    }
+    const options = {
+      message:text,
+      recvID:currentConversation?.userID,
+      groupID:currentConversation?.groupID,
+      offlinePushInfo
+    }
+    const msg = await SendMessage(options)
+    pushNewMessage(msg)
     setInputMessage(""); // Clear the input field after sending
   };
 

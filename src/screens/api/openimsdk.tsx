@@ -132,10 +132,11 @@ export const GetSelfInfo = async () => {
 
 export const SendMessage = async (options) => {
     try {
+        console.log(options)
         const data = await OpenIMSDKRN.sendMessage(options,"01342199")
         return data
     } 
     catch (error) {
-        console.error('Error GetSelfInfo:', error); 
+        console.error('Error SendMessage:', error); 
     }
 }

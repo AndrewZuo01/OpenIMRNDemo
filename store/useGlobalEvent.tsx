@@ -1,8 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { OpenIMEmitter } from 'open-im-sdk-rn';
 import { useContactStore } from "./contact";
 import { FriendUserItem, WSEvent } from "./type.d";
 import { useConversationStore } from "./conversation";
+import { ExMessageItem, useMessageStore } from "./message";
+import { MessageType } from "./types/enum";
+import { RevokedInfo } from "./types/entity";
 export const initStore = () => {
     // const { getSelfInfoByReq } = useUserStore.getState();
     const {
@@ -39,7 +42,11 @@ export function useGlobalEvent() {
     }, []);
 
     const eventNames = ['OnSelfInfoUpdated', 'OnConnecting', 'OnConnectFailed', 'OnConnectSuccess', 'OnKickedOffline', 'OnUserTokenExpired', 'OnSyncServerStart', 'OnSyncServerFinish', 'OnSyncServerFailed', 'OnRecvNewMessage', 'OnRecvNewMessages', 'OnNewRecvMessageRevoked', 'OnConversationChanged', 'OnNewConversation', 'OnTotalUnreadMessageCountChanged', 'OnFriendInfoChanged', 'OnFriendAdded', 'OnFriendDeleted', 'OnBlackAdded', 'OnBlackDeleted', 'OnJoinedGroupAdded', 'OnJoinedGroupDeleted', 'OnGroupInfoChanged', 'OnGroupMemberAdded', 'OnGroupMemberDeleted', 'OnGroupMemberInfoChanged', 'OnFriendApplicationAdded', 'OnFriendApplicationAccepted', 'OnFriendApplicationRejected', 'OnGroupApplicationAdded', 'OnGroupApplicationAccepted', 'OnGroupApplicationRejected'];
-
+    const [connectState, setConnectState] = useState({
+        isSyncing: false,
+        isLogining: false,
+        isConnecting: false,
+      });
     // const updateSelfInfo = useUserStore((state) => state.updateSelfInfo);
     // const userLogout = useUserStore((state) => state.userLogout);
     // const updateConversationList = useConversationStore((state) => state.updateConversationList);
@@ -48,8 +55,8 @@ export function useGlobalEvent() {
     // const getCurrentGroupInfoByReq = useConversationStore((state) => state.getCurrentGroupInfoByReq);
     // const getCurrentMemberInGroupByReq = useConversationStore((state) => state.getCurrentMemberInGroupByReq);
     // const tryUpdateCurrentMemberInGroup = useConversationStore((state) => state.tryUpdateCurrentMemberInGroup);
-    // const pushNewMessage = useMessageStore((state) => state.pushNewMessage);
-    // const updateOneMessage = useMessageStore((state) => state.updateOneMessage);
+    const pushNewMessage = useMessageStore((state) => state.pushNewMessage);
+    const updateOneMessage = useMessageStore((state) => state.updateOneMessage);
     const updateFriend = useContactStore((state) => state.updateFriend);
     const pushNewFriend = useContactStore((state) => state.pushNewFriend);
     // const updateBlack = useContactStore((state) => state.updateBlack);
@@ -74,35 +81,35 @@ export function useGlobalEvent() {
     //     error: msg,
     //     onClose: () => userLogout(),
     // });
-    // const syncStartHandler = () => setConnectState((state) => ({ ...state, isSyncing: true }));
-    // const syncFinishHandler = () => setConnectState((state) => ({ ...state, isSyncing: false }));
-    // const syncFailedHandler = () => {
-    //     feedbackToast({ msg: "同步失败！", error: "同步失败！" });
-    //     setConnectState((state) => ({ ...state, isSyncing: false }));
-    // };
+    const syncStartHandler = () => setConnectState((state) => ({ ...state, isSyncing: true }));
+    const syncFinishHandler = () => setConnectState((state) => ({ ...state, isSyncing: false }));
+    const syncFailedHandler = () => {
+        // feedbackToast({ msg: "同步失败！", error: "同步失败！" });
+        setConnectState((state) => ({ ...state, isSyncing: false }));
+    };
 
-    // const newMessageHandler = ({ data }: WSEvent<ExMessageItem | ExMessageItem[]>) => {
-    //     if (connectState.isSyncing) return;
-    //     if (Array.isArray(data)) data.forEach(handleNewMessage);
-    //     else handleNewMessage(data);
-    // };
+    const newMessageHandler = ({ data }: WSEvent<ExMessageItem | ExMessageItem[]>) => {
+        if (connectState.isSyncing) return;
+        if (Array.isArray(data)) data.forEach(handleNewMessage);
+        else handleNewMessage(data);
+    };
 
-    // const revokedMessageHandler = ({ data }: WSEvent<RevokedInfo>) => updateOneMessage({
-    //     clientMsgID: data.clientMsgID,
-    //     contentType: MessageType.RevokeMessage,
-    //     notificationElem: {
-    //         detail: JSON.stringify(data),
-    //     },
-    // } as ExMessageItem);
+    const revokedMessageHandler = ({ data }: WSEvent<RevokedInfo>) => updateOneMessage({
+        clientMsgID: data.clientMsgID,
+        contentType: MessageType.RevokeMessage,
+        notificationElem: {
+            detail: JSON.stringify(data),
+        },
+    } as ExMessageItem);
 
-    // const notPushType = [MessageType.TypingMessage, MessageType.RevokeMessage];
+    const notPushType = [MessageType.TypingMessage, MessageType.RevokeMessage];
 
-    // const handleNewMessage = (newServerMsg: ExMessageItem) => {
-    //     if (!notPushType.includes(newServerMsg.contentType)) {
-    //         pushNewMessage(newServerMsg);
-    //         emitter.emit("CHAT_LIST_SCROLL_TO_BOTTOM", true);
-    //     }
-    // };
+    const handleNewMessage = (newServerMsg: ExMessageItem) => {
+        if (!notPushType.includes(newServerMsg.contentType)) {
+            pushNewMessage(newServerMsg);
+            // emitter.emit("CHAT_LIST_SCROLL_TO_BOTTOM", true);
+        }
+    };
 
     // const conversationChnageHandler = ({ data }: WSEvent<ConversationItem[]>) => updateConversationList(data, "filter");
     // const newConversationHandler = ({ data }: WSEvent<ConversationItem[]>) => updateConversationList(data, "push");
@@ -163,14 +170,14 @@ export function useGlobalEvent() {
         OpenIMEmitter.addListener('onConnectSuccess', connectSuccessHandler);
         // OpenIMEmitter.addListener('OnKickedOffline', (v) => { kickHandler });
         // OpenIMEmitter.addListener('OnUserTokenExpired', (v) => { expiredHandler });
-        // // sync
-        // OpenIMEmitter.addListener('onSyncServerStart', syncStartHandler );
-        // OpenIMEmitter.addListener('OnSyncServerFinish', (v) => { syncFinishHandler });
-        // OpenIMEmitter.addListener('OnSyncServerFailed', (v) => { syncFailedHandler });
-        // // message
-        // OpenIMEmitter.addListener('OnRecvNewMessage', (v) => { newMessageHandler });
-        // OpenIMEmitter.addListener('OnRecvNewMessages', (v) => { newMessageHandler });
-        // OpenIMEmitter.addListener('OnNewRecvMessageRevoked', (v) => { revokedMessageHandler });
+        // sync
+        OpenIMEmitter.addListener('onSyncServerStart', syncStartHandler );
+        OpenIMEmitter.addListener('onSyncServerFinish', syncFinishHandler );
+        OpenIMEmitter.addListener('onSyncServerFailed',  syncFailedHandler );
+        // message
+        OpenIMEmitter.addListener('onRecvNewMessage',  newMessageHandler );
+        OpenIMEmitter.addListener('onRecvNewMessages',  newMessageHandler );
+        OpenIMEmitter.addListener('onNewRecvMessageRevoked',revokedMessageHandler );
         // // conversation
         // OpenIMEmitter.addListener('OnConversationChanged', (v) => { conversationChnageHandler });
         // OpenIMEmitter.addListener('OnNewConversation', (v) => { newConversationHandler });

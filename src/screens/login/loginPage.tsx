@@ -6,6 +6,7 @@ import md5 from 'react-native-md5';
 import { LoginClient } from '../api/requests';
 import { GetLoginStatus } from '../api/openimsdk';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack/lib/typescript/src/types';
+import { initStore } from '../../../store/useGlobalEvent';
 interface LoginPageProps{
   onLogin: (value:boolean) => void;
 }
@@ -60,6 +61,7 @@ const LoginPage:React.FC<LoginPageProps> = ({onLogin}) => {
     if(result.success){
       setError("")
       onLogin(true)
+      initStore()
     }else{
       setError(result.errorMsg)
     }

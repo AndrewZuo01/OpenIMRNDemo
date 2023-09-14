@@ -4,6 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { CheckVerifyClient, LoginClient, SendVerifyClient } from '../api/requests';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack/lib/typescript/src/types';
+import { initStore } from '../../../store/useGlobalEvent';
 interface LoginWithVerificationPageProps{
   onLogin: (value:boolean) => void;
 }
@@ -43,6 +44,7 @@ const LoginWithVerificationPage:React.FC<LoginWithVerificationPageProps> = ({onL
       const result2 = await LoginClient({password:"",phoneNumber:email,verifyCode:password,areaCode:"+86"});
       if(result2.success){
         onLogin(true)
+        initStore()
       }else{
         setError(result2.errorMsg)
       }

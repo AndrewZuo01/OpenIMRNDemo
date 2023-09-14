@@ -3,6 +3,7 @@ import { USER_URL } from "../../config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LoginIM } from "./openimsdk";
 import { criticallyDampedSpringCalculations } from "react-native-reanimated/lib/typescript/reanimated2/animation/springUtils";
+import { BusinessUserInfo } from "../../../store/user";
 
 export const LoginClient = async (params: { password: string; phoneNumber: any; verifyCode: string; areaCode: string; }) => {
   let platform = 1;
@@ -96,7 +97,6 @@ export const SignUpClient = async (params: { nickname?: string; phoneNumber: any
   
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
         if(data.errCode!=0){
             console.error('Data ', data.errDlt);
             return { success: false, errorMsg: data.errDlt };
@@ -109,7 +109,6 @@ export const SignUpClient = async (params: { nickname?: string; phoneNumber: any
             await AsyncStorage.setItem('imToken', imToken);
             await AsyncStorage.setItem('userID', userID);
                 
-            console.log('User Data chatToken, imToken, userID saved successfully');
             const result = await LoginIM()
             if(result.success)
               return { success: true, errorMsg: "" };
@@ -157,14 +156,11 @@ export const SendVerifyClient = async (params: { usedFor: number; phoneNumber: a
   
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
         if(data.errCode!=0){
             console.error('Data ', data.errDlt);
             return {success:false,errorMsg: data.errDlt};
         }
         else{
-            console.log(data)
-            console.log("Code sent successfully");
             return {success:true,errorMsg: ""};
         }
       } else {
@@ -208,8 +204,6 @@ export const CheckVerifyClient = async (params: { phoneNumber: any; verifyCode: 
             return {success:false,errorMsg:data.errDlt};
         }
         else{
-            console.log(data)
-            console.log("Code verify successfully");
             return {success:true,errorMsg:""};
         }
         
@@ -254,8 +248,6 @@ export const ResetPasswordClient = async (params: { phoneNumber: any; password: 
           return {success:false,errorMsg:data.errDlt};
       }
       else{
-          console.log(data)
-          console.log("Code verify successfully");
           return {success:true,errorMsg:""};
       }
       
@@ -270,3 +262,21 @@ export const ResetPasswordClient = async (params: { phoneNumber: any; password: 
     return {success:true,errorMsg:"Network error"};
   }
 }
+
+export const getBusinessUserInfo = async (userIDs: string[], isSelfInfo = false) => {
+  const tk = await AsyncStorage.getItem('imToken');
+  const id = await AsyncStorage.getItem('userID');
+  return request.post<{ users: BusinessUserInfo[] }>(
+    "/user/find/full",
+    {
+      id,
+    },
+    {
+      headers: {
+        operationID: '923821',
+        tk,
+      },
+    },
+  );
+};
+

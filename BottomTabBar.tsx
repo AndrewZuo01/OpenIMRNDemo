@@ -8,6 +8,7 @@ import ChatPage from './src/screens/chats/chatPage';
 const Tab = createBottomTabNavigator();
 
 const BottomTabBar = () => {
+  
   return (
     <Tab.Navigator>
       <Tab.Screen name="Main" component={ChatPage} options={{ headerShown: false }}/>

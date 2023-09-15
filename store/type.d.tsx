@@ -9,21 +9,17 @@ export declare type WSEvent<T = unknown> = {
     operationID: string;
 };
 export declare type FriendUserItem = {
-    blackInfo: any;
-    friendInfo: {
-        addSource: number;
-        attachedInfo: string;
-        createTime: number;
-        ex: string;
-        faceURL: string;
-        nickname: string;
-        operatorUserID: string;
-        ownerUserID: string;
-        remark: string;
-        userID: string;
-    };
-    publicInfo: any;
-    offset?: number;
+
+    addSource: number;
+    attachedInfo: string;
+    createTime: number;
+    ex: string;
+    faceURL: string;
+    nickname: string;
+    operatorUserID: string;
+    ownerUserID: string;
+    remark: string;
+    userID: string;
 };
 export declare type FriendApplicationItem = {
     createTime: number;
@@ -48,9 +44,13 @@ export declare enum ApplicationHandleResult {
     Agree = 1,
     Reject = -1
 }
+export type PreViewImg = {
+    url: string;
+    clientMsgID: string;
+  };
 export interface MessageStore {
     historyMessageList: ExMessageItem[];
-    // previewImgList: PreViewImg[];
+    previewImgList: PreViewImg[];
     lastMinSeq: number;
     hasMore: boolean;
     isCheckMode: boolean;
@@ -61,10 +61,11 @@ export interface MessageStore {
     // clearHistoryMessage: () => void;
     // updatePreviewImgList: (list: PreViewImg[]) => void;
     // updateCheckMode: (isCheckMode: boolean) => void;
-    // tryUpdatePreviewImg: (messageList: ExMessageItem[]) => void;
+    tryUpdatePreviewImg: (messageList: ExMessageItem[]) => void;
 }
 
 export interface ContactStore {
+
 
     friendList: FriendUserItem[];
     recvFriendApplicationList: FriendApplicationItem[];
@@ -75,14 +76,17 @@ export interface ContactStore {
     pushNewFriend: (friend: FriendUserItem) => void;
     getRecvFriendApplicationListByReq: () => Promise<void>;
     getSendFriendApplicationListByReq: () => Promise<void>;
+    updateRecvFriendApplication: (application: FriendApplicationItem) => void;
+    updateSendFriendApplication: (application: FriendApplicationItem) => void;
     clearContactStore: () => void;
 }
 export interface UserStore {
+    selfInfo: any;
     // selfInfo: BusinessUserInfo;
     appConfig: AppConfig;
     appSettings: AppSettings;
     // updateSelfInfo: (info: Partial<BusinessUserInfo>) => void;
-    // getSelfInfoByReq: () => Promise<void>;
+    getSelfInfoByReq: () => Promise<void>;
     // getAppConfigByReq: () => Promise<void>;
     // updateAppSettings: (settings: Partial<AppSettings>) => void;
     userLogout: () => Promise<void>;

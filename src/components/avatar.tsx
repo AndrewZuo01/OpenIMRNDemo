@@ -2,11 +2,11 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import images from "./defaultAvatarHelper";
 import LinearGradient from "react-native-linear-gradient";
 
-const Avatar = ({ item }: { item: any }) => {
-  if (!item) {
+const Avatar = ({ nickname,faceURL }: {  nickname:string,faceURL:string}) => {
+  if (faceURL===null) {
     return null; // Return null or a placeholder component if data is undefined
   }
-  if (item.faceURL === "" && item.nickname) {
+  if (faceURL==='') {
 
     return (
       <LinearGradient
@@ -15,60 +15,49 @@ const Avatar = ({ item }: { item: any }) => {
         end={{ x: 1, y: 1 }}
         style={styles.textImage}
       >
-
-        <Text style={styles.textImageText}>{item.nickname.charAt(0).toUpperCase()}</Text>
+        <Text style={styles.textImageText}>{nickname.charAt(0).toUpperCase()}</Text>
       </LinearGradient>
     );
-  } else if (item.faceURL === "" && item.showName) {
-    return (
-      <LinearGradient
-        colors={['#EAF27E', '#00D292']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.textImage}
-      >
-        <Text style={styles.textImageText}>{item.showName.charAt(0).toUpperCase()}</Text>
-      </LinearGradient>);
-  }
-  else if (item.faceURL === "ic_avatar_01") {
+  } 
+  else if (faceURL === "ic_avatar_01") {
     return (
       <Image style={styles.avatar} source={images.ic_avatar_01} />
     );
-  } else if (item.faceURL === "ic_avatar_02") {
+  } else if (faceURL === "ic_avatar_02") {
     return (
       <Image style={styles.avatar} source={images.ic_avatar_02} />
     );
-  } else if (item.faceURL === "ic_avatar_03") {
+  } else if (faceURL === "ic_avatar_03") {
     return (
       <Image style={styles.avatar} source={images.ic_avatar_03} />
     );
-  } else if (item.faceURL === "ic_avatar_04") {
+  } else if (faceURL === "ic_avatar_04") {
     return (
       <Image style={styles.avatar} source={images.ic_avatar_04} />
     );
-  } else if (item.faceURL === "ic_avatar_05") {
+  } else if (faceURL === "ic_avatar_05") {
     return (
       <Image style={styles.avatar} source={images.ic_avatar_05} />
     );
-  } else if (item.faceURL === "ic_avatar_06") {
+  } else if (faceURL === "ic_avatar_06") {
     return (
       <Image style={styles.avatar} source={images.ic_avatar_06} />
     );
-  } else if (item.faceURL === "New Friend") {
+  } else if (faceURL === "New Friend") {
     return (
       <Image style={styles.avatar} source={images.newFriend} />
     );
-  } else if (item.faceURL === "New Group") {
+  } else if (faceURL === "New Group") {
     return (
       <Image style={styles.avatar} source={images.newGroup} />
     );
-  } else if (item.faceURL === "My Groups") {
+  } else if (faceURL === "My Groups") {
     return (
       <Image style={styles.avatar} source={images.myGroups} />
     );
   }
   return (
-    <Image style={styles.avatar} source={{ uri: item.faceURL }} />
+    <Image style={styles.avatar} source={{ uri: faceURL }} />
   );
 };
 

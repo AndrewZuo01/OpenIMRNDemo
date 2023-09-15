@@ -2,26 +2,21 @@ import { StyleSheet, Text, View } from "react-native";
 import Avatar from "../../../components/avatar";
 import { GetSelfInfo, GetUsersInfo } from "../../api/openimsdk";
 import { useEffect, useState } from "react";
+import { useUserStore } from "../../../../store/user";
+import { ExMessageItem } from "../../../../store/message";
 
-const TextChatCard = ({ message }) => {
-  const [item, setItem] = useState({});
+const TextChatCard = ({ message }:{message:ExMessageItem}) => {
   const [selfID, setSelfID] = useState(false);
-
   if (message.contentType !== 101) return null;
-
+  const currentID = useUserStore((state) => state.selfInfo);
+  
   useEffect(() => {
-    
-    const getAvatar = async () => {
-      setItem({
-        nickname: message.senderNickname ?? "",
-        faceURL: message.senderFaceUrl ?? "",
-      });
-      const currentID = await GetSelfInfo();
-      if (JSON.parse(currentID.data).userID === message.sendID) setSelfID(true);
-    };
-    getAvatar();
-  }, []);
-
+      if (currentID.userID === message.sendID) {
+        setSelfID(true);
+    }
+  }, [message.contentType, message.sendID]);
+  
+  
   if (selfID) {
     return (
       <View style={styles.chatContainerSelf}>
@@ -31,7 +26,7 @@ const TextChatCard = ({ message }) => {
           <Text style={styles.messageText}>{message.textElem.content}</Text>
         </View>
         <View style={styles.avatarContainer}>
-          <Avatar item={item} />
+          <Avatar nickname={message.senderNickname} faceURL={message.senderFaceUrl ?? ''}/>
         </View>
       </View>
     );
@@ -40,7 +35,7 @@ const TextChatCard = ({ message }) => {
   return (
     <View style={styles.chatContainerOther}>
       <View style={styles.avatarContainer}>
-        <Avatar item={item} />
+        <Avatar nickname={message.senderNickname} faceURL={message.senderFaceUrl ?? ''}/>
       </View>
       <View style={styles.messageContainerOther}>
         <Text style={styles.messageText}>{message.senderNickname}</Text>

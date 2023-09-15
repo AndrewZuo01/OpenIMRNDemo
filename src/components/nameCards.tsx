@@ -3,28 +3,24 @@ import Avatar from "./avatar";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-const NameCards = ({ item }:{item:any}) => {
+const NameCards = ({ nickname,faceURL,userID,handleResult }:{nickname:string,faceURL:string,fromUserID:string,handleResult:number}) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  if (!item)
+  if (!nickname)
     return null
-  if (item.fromUserID) {
-    const friendInfoWrapper = {
-      nickname: item.fromNickname,
-      faceURL: item.fromFaceURL
-    }
+  if (userID) {
     let result = <Text>accepted</Text>
-    if (item.handleResult == -1)
+    if (handleResult == -1)
       result = <Text>rejected</Text>
-    if (item.handleResult == 0) {
+    if (handleResult == 0) {
       const handleViewPress = () => {
-        navigation.navigate("FriendRequests",{item})
+        navigation.navigate("FriendRequests",{nickname:nickname,faceURL:faceURL})
       }
       return (
         <View style={[styles.contactItem, { flexDirection: "row", justifyContent: "space-between", alignItems: "center" }]}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Avatar item={friendInfoWrapper} />
+            <Avatar nickname={nickname} faceURL={faceURL}/>
             <View style={{marginBottom:30}}>
-              <Text>{item.fromNickname}</Text>
+              <Text>nickname</Text>
             </View>
           </View>
           <TouchableOpacity style={{ backgroundColor: "blue", paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 }} onPress={handleViewPress}>
@@ -39,10 +35,10 @@ const NameCards = ({ item }:{item:any}) => {
     return (
 
       <View style={styles.contactItem}>
-        <Avatar item={friendInfoWrapper} />
+        <Avatar nickname={nickname} faceURL="" />
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text>{item.fromNickname}</Text>
+            <Text>{nickname}</Text>
             <Text>{result}</Text>
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
@@ -53,10 +49,7 @@ const NameCards = ({ item }:{item:any}) => {
       </View>
     )
   }
-  if (!item || !item.friendInfo) {
-    return null; // Return null or a placeholder component if data is undefined
-  }
-  if (item.friendInfo.userID === "newFriend") {
+  if (userID === "newFriend") {
 
     const onhandlePressNewFriend = () => {
 
@@ -64,16 +57,16 @@ const NameCards = ({ item }:{item:any}) => {
     }
     return (
       <TouchableOpacity style={styles.contactItem} onPress={onhandlePressNewFriend}>
-        <Avatar item={item.friendInfo} />
-        <Text>{item.friendInfo.nickname}</Text>
+        <Avatar nickname={nickname} faceURL={faceURL} />
+        <Text>{nickname}</Text>
       </TouchableOpacity>
     )
   }
 
   return (
     <TouchableOpacity style={styles.contactItem}>
-      <Avatar item={item.friendInfo} />
-      <Text>{item.friendInfo.nickname}</Text>
+      <Avatar nickname={nickname}  faceURL={faceURL} />
+      <Text>{nickname}</Text>
     </TouchableOpacity>
   );
 };

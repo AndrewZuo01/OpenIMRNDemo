@@ -3,6 +3,7 @@ import { MessageItem } from "./types/entity";
 import { MessageStore } from "./type.d";
 import OpenIMSDKRN from "open-im-sdk-rn";
 import { useConversationStore } from "./conversation";
+import { MessageType } from "./types/enum";
 
 
 const GET_HISTORY_MESSAGE_COUNT = 40;
@@ -44,12 +45,12 @@ export const useMessageStore = create<MessageStore>()((set, get) => ({
       const data = JSON.parse(rawData)
       const nextList = [...data.messageList, ...(loadMore ? prevList : [])];
 
-    //   const imageUrls = filterPreviewImage(data.messageList);
-    //   if (imageUrls.length > 0 || !loadMore) {
-    //     set((state) => ({
-    //       previewImgList: [...imageUrls, ...(loadMore ? state.previewImgList : [])],
-    //     }));
-    //   }
+      const imageUrls = filterPreviewImage(data.messageList);
+      if (imageUrls.length > 0 || !loadMore) {
+        set((state) => ({
+          previewImgList: [...imageUrls, ...(loadMore ? state.previewImgList : [])],
+        }));
+      }
 
       set(() => ({
         lastMinSeq: data.lastMinSeq,
@@ -63,7 +64,7 @@ export const useMessageStore = create<MessageStore>()((set, get) => ({
     }
   },
   pushNewMessage: (message: ExMessageItem) => {
-    // get().tryUpdatePreviewImg([message]);
+    get().tryUpdatePreviewImg([message]);
     set((state) => ({
       historyMessageList: [...state.historyMessageList, message],
     }));
@@ -75,11 +76,46 @@ export const useMessageStore = create<MessageStore>()((set, get) => ({
       return;
     }
     if (fromSuccessCallBack) {
-    //   get().tryUpdatePreviewImg([message]);
+      get().tryUpdatePreviewImg([message]);
     }
     tmpList[idx] = { ...tmpList[idx], ...message };
     set(() => ({ historyMessageList: tmpList }));
   },
+  tryUpdatePreviewImg: (mesageList: ExMessageItem[]) => {
+    const imageUrls = filterPreviewImage(mesageList);
+    if (imageUrls.length === 0) return;
+    set((state) => ({
+      previewImgList: [...state.previewImgList, ...imageUrls],
+    }));
+  },
 }));
 
 
+
+function filterPreviewImage(messages: MessageItem[]) {
+  return messages
+    .filter((message) => {
+      if (message.contentType === MessageType.PictureMessage) {
+        return true;
+      }
+      if (message.contentType === MessageType.OANotification) {
+        let notificationData = {} as any;
+        try {
+          notificationData = JSON.parse(message.notificationElem.detail);
+        } catch (error) {
+          console.error(error);
+        }
+        if (notificationData.mixType === 1) {
+          message.pictureElem.snapshotPicture.url =
+            notificationData.pictureElem.sourcePicture.url;
+          return true;
+        }
+        return false;
+      }
+      return false;
+    })
+    .map((item) => ({
+      url: item.pictureElem.sourcePicture.url,
+      clientMsgID: item.clientMsgID,
+    }));
+}

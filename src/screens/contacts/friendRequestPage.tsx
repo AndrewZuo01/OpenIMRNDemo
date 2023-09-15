@@ -7,19 +7,18 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import API from "../api/typings";
 import { useContactStore } from "../../../store/contact";
-
+import {FriendRequestCard} from "./friendRequestCard"
+import { FriendApplicationItem } from "../../../store/type.d";
 const FriendRequestPage = () => {
-    const [friends, setFriends] = useState<API.API.Friend.FriendRequest[]>([]);
     const navigator = useNavigation<NativeStackNavigationProp<any>>();
-    const recvFriendApplicationList = useContactStore(
+    const recvFriendApplicationList:FriendApplicationItem[] = useContactStore(
         (state) => state.recvFriendApplicationList,
     );
-    const sendFriendApplicationList = useContactStore(
-        (state) => state.sendFriendApplicationList,
-    );
-    const applicationList = [...recvFriendApplicationList,...sendFriendApplicationList]
+
+    const sendFriendApplicationList:FriendApplicationItem[] = [];
+    const applicationList:FriendApplicationItem[] = [...recvFriendApplicationList,...sendFriendApplicationList]
     applicationList.sort((a, b) => b.createTime - a.createTime);
-        
+    
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -34,7 +33,7 @@ const FriendRequestPage = () => {
                 data={applicationList}
                 renderItem={( {item} ) => {
                     return (
-                        <NameCards item={item} />
+                        <FriendRequestCard nickname={item.fromNickname} faceURL={item.fromFaceURL} handleResult={item.handleResult} reqMsg={item.reqMsg} fromUserID={item.fromUserID} />
                     )
                 }}
                 // keyExtractor={(item) => item.createTime.toString()} // Use a unique key

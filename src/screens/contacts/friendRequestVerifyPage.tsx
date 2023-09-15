@@ -4,14 +4,15 @@ import Avatar from "../../components/avatar";
 import { AcceptFriendApplication, RefuseFriendApplication } from "../api/openimsdk";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
-
-const FriendRequestVerifyPage = (props: { route: { params: { item: any; }; }; }) => {
+interface FriendRequestItem {
+  faceURL: string;
+  fromUserID: string;
+  nickname: string; 
+  reqMsg: string; 
+}
+const FriendRequestVerifyPage = (props: { route: { params: FriendRequestItem  }; }) => {
   const navigator = useNavigation<NativeStackNavigationProp<any>>();
-  const friendRequestInfo = props.route.params.item
-  const friendInfoWrapper = {
-    nickname: friendRequestInfo.fromNickname,
-    faceURL: friendRequestInfo.fromFaceURL
-  }
+  const friendRequestInfo = props.route.params
   const onhandleAccept = () => {
     const options = {
       toUserID: friendRequestInfo.fromUserID,
@@ -41,10 +42,10 @@ const FriendRequestVerifyPage = (props: { route: { params: { item: any; }; }; })
       <View style={styles.body}>
         <View style={styles.bodyTop}>
           <View style={styles.avatarContainer}>
-            <Avatar item={friendInfoWrapper} />
+            <Avatar nickname={friendRequestInfo.nickname} faceURL={friendRequestInfo.faceURL} />
           </View>
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{friendRequestInfo.fromNickname}</Text>
+            <Text style={styles.userName}>{friendRequestInfo.nickname}</Text>
             <Text style={styles.requestInfo}>{friendRequestInfo.reqMsg}</Text>
           </View>
         </View>

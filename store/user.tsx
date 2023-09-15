@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import { MessageReceiveOptType } from "./types/enum";
 import { AppConfig, UserStore } from "./type.d";
+import OpenIMSDKRN from "open-im-sdk-rn";
 
 export interface BusinessUserInfo {
     userID: string;
@@ -32,18 +33,20 @@ export const useUserStore = create<UserStore>()((set, get) => ({
     locale: "zh-CN", //need update
     closeAction: "miniSize",
   },
-//   getSelfInfoByReq: async () => {
-//     try {
-//       const { data } = await IMSDK.getSelfUserInfo<BusinessUserInfo>();
-//       const {
-//         data: { users },
-//       } = await getBusinessUserInfo([data.userID], true);
-//       const bussinessData = users[0];
-//       set(() => ({ selfInfo: bussinessData }));
-//     } catch (error) {
-//       feedbackToast({ error, msg: t("toast.getSelfInfoFailed") });
-//     }
-//   },
+  getSelfInfoByReq: async () => {
+    try {
+      const  rawData  = await OpenIMSDKRN.getSelfUserInfo('29129');
+      const data =JSON.parse(rawData)
+      // const {
+      //   data: { users },
+      // } = await getBusinessUserInfo([data.userID], true);
+      // const bussinessData = users[0];
+      // set(() => ({ selfInfo: bussinessData }));
+      set(()=>({selfInfo:data}))
+    } catch (error) {
+      // feedbackToast({ error, msg: t("toast.getSelfInfoFailed") });
+    }
+  },
 //   updateSelfInfo: (info: Partial<BusinessUserInfo>) => {
 //     set((state) => ({ selfInfo: { ...state.selfInfo, ...info } }));
 //   },

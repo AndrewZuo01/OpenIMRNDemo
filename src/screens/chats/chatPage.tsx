@@ -1,16 +1,16 @@
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { GetAllConversationList } from "../api/openimsdk";
 import { useEffect, useState } from "react";
-import ConversationCard from "../../components/conversationCard";
+import ConversationCard from "./conversationCard";
 import { API } from "../api/typings";
 import { useMessageStore } from "../../../store/message";
 import { useConversationStore } from "../../../store/conversation";
 import { ConversationItem } from "../../../store/types/entity";
 
 const ChatPage = () => {
-    const rawData = useConversationStore((state) => state.conversationList);
+    const rawData:ConversationItem[] = useConversationStore((state) => state.conversationList);
     
-    const renderConversationItem = ({item} ) => {
+    const renderConversationItem = ({item}:{item:ConversationItem} ) => {
         return (
             <View style={{}}>
                 <ConversationCard item={item}></ConversationCard>

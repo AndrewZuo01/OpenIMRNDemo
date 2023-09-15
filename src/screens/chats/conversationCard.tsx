@@ -1,12 +1,12 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Avatar from "./avatar";
+import Avatar from "../../components/avatar";
 import { useState, useEffect } from "react";
-import { API } from "../screens/api/typings";
+import { API } from "../api/typings";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
-import ChatRoom from "../screens/chats/chatRoom";
-import { GetAdvancedHistoryMessageListReverse } from "../screens/api/openimsdk";
-import { ConversationItem } from "../../store/types/entity";
+import ChatRoom from "./chatRoom";
+import { GetAdvancedHistoryMessageListReverse } from "../api/openimsdk";
+import { ConversationItem } from "../../../store/types/entity";
 
 const ConversationCard = ({ item }:{item:ConversationItem}) => {
     
@@ -61,10 +61,9 @@ const ConversationCard = ({ item }:{item:ConversationItem}) => {
     if (!item) {
         return null; // Return null or a placeholder component if data is undefined
     }
-
     return (
         <TouchableOpacity style={styles.contactItem} onPress={handleConversation}>
-            <Avatar item={item} />
+            <Avatar nickname={item.showName} faceURL={item.faceURL} />
             <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     <Text>{item.showName}</Text>

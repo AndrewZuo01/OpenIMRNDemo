@@ -1,31 +1,51 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Avatar from "../../components/avatar";
 import TextChatCard from "./chatCards/textChatCard";
-import { GetAdvancedHistoryMessageListReverse, GetSelfInfo, SendMessage } from "../api/openimsdk";
+import { GetAdvancedHistoryMessageListReverse, GetSelfInfo, GetUsersInfo, SendMessage } from "../api/openimsdk";
 import { API } from "../api/typings";
 import { useMessageStore } from "../../../store/message";
 import { useConversationStore } from "../../../store/conversation";
 import { ConversationItem } from "../../../store/types/entity";
 import { FlatList } from "react-native-gesture-handler";
 import OpenIMSDKRN from "open-im-sdk-rn";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import ImageCard from "./chatCards/imageCard";
+import OptionModalView from "./optionsModalView";
 
-const ChatRoom = (conversation) => {
-  const updateCurrentConversation  = useConversationStore((state) => state.updateCurrentConversation)
+const ChatRoom = (conversation: { route: { params: { item: ConversationItem }; }; }) => {
+  const updateCurrentConversation = useConversationStore((state) => state.updateCurrentConversation)
   const currentConversation = useConversationStore((state) => state.currentConversation)
-
+  const navigator = useNavigation<NativeStackNavigationProp<any>>();
   const { getHistoryMessageListByReq } = useMessageStore.getState();
+  const [user, setUser] = useState({
+    faceURL: '',
+    nickname: "",
+  });
   useEffect(() => {
     updateCurrentConversation(conversation.route.params.item);
     getHistoryMessageListByReq();
+    const getUser = async () => {
+      try {
+        const data = await GetUsersInfo([conversation.route.params.item!.userID]);
+        setUser((JSON.parse(data!.data))[0].friendInfo)
+      } catch (error) {
+        // Handle errors here
+      }
+    };
+    getUser();
   }, []);
 
   const messages = useMessageStore((state) => state.historyMessageList);
-  const user = {
-    avatarURL: "https://example.com/avatar.jpg",
-    name: "John Doe",
-    onlineStatus: "Online",
+
+  const [showModal, setShowModal] = useState(false); 
+  const toggleModal = () => {
+    setShowModal(!showModal);
   };
+
+
+
   const pushNewMessage = useMessageStore((state) => state.pushNewMessage);
   const updateOneMessage = useMessageStore((state) => state.updateOneMessage);
   const [inputMessage, setInputMessage] = useState(""); // State to hold the input message
@@ -37,10 +57,10 @@ const ChatRoom = (conversation) => {
       const data = await OpenIMSDKRN.createTextMessage(inputMessage, "289893")
 
       text = data;
-    }catch (error) {
+    } catch (error) {
       console.error('Error CreateTextMsg:', error); // Log the error
     }
-      
+
     const offlinePushInfo = {
       title: 'you have a new message',
       desc: 'new message',
@@ -49,9 +69,9 @@ const ChatRoom = (conversation) => {
       iOSBadgeCount: true,
     }
     const options = {
-      message:text,
-      recvID:currentConversation?.userID,
-      groupID:currentConversation?.groupID,
+      message: text,
+      recvID: currentConversation?.userID,
+      groupID: currentConversation?.groupID,
       offlinePushInfo
     }
     const msg = await SendMessage(options)
@@ -62,14 +82,14 @@ const ChatRoom = (conversation) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          {/* Add your back button component here */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navigator.goBack()}>
+          <Image source={require("../../../assets/imgs/back.png")} />
         </TouchableOpacity>
         <View style={styles.userInfo}>
-          <Avatar item={{ faceURL: user.avatarURL }} />
+          <Avatar faceURL={user.faceURL} nickname={user.nickname} />
           <View style={styles.userDetails}>
-            <Text style={styles.userName}>{user.name}</Text>
-            <Text style={styles.onlineStatus}>{user.onlineStatus}</Text>
+            <Text style={styles.userName}>{user.nickname}</Text>
+            {/* <Text style={styles.onlineStatus}>{user.onlineStatus}</Text> */}
           </View>
         </View>
       </View>
@@ -77,10 +97,21 @@ const ChatRoom = (conversation) => {
         style={styles.messageList}
         data={messages}
         renderItem={({ item: message }) => {
-          return <TextChatCard message={message}></TextChatCard>;
+          if (message.contentType === 101) {
+            return <TextChatCard message={message} />;
+          } else if (message.contentType === 102) {
+            return <ImageCard message={message} />;
+          } else {
+            // Return a placeholder component or an empty View for other cases
+            return <View />;
+          }
         }}
+        
       />
       <View style={styles.inputContainer}>
+        <TouchableOpacity style={styles.moreOptionsButton} onPress={toggleModal}>
+          <Image style={styles.moreOptionsButtonImage}  source={require("../../../assets/imgs/options.png")} ></Image>
+        </TouchableOpacity>
         <TextInput
           style={styles.input}
           placeholder="Type your message..."
@@ -90,6 +121,7 @@ const ChatRoom = (conversation) => {
         <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
+        <OptionModalView isVisible={showModal} onClose={toggleModal} />
       </View>
     </View>
   );

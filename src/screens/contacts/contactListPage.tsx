@@ -19,21 +19,22 @@ import SearchDrawer from '../../components/searchDrawer';
 import { useGlobalEvent } from '../../../store/useGlobalEvent';
 import { useContactStore } from '../../../store/contact';
 import { FriendUserItem } from '../../../store/type.d';
+import ContactCard from './contactCard';
 
 const ContactListPage = () => {
   const [search, setSearch] = useState('');
   const [alphabetHints, setAlphabetHints] = useState<string[]>([]);
-  const [contactSections, setContactSections] = useState<{ title: string, data: API.API.Friend.FriendData[] }[]>([]);
+  const [contactSections, setContactSections] = useState<{ title: string, data: FriendUserItem[] 
+}[]>([]);
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const sectionListRef: RefObject<SectionList> = useRef(null);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const popupSearchInputRef = useRef<TextInput | null>(null);
   const rawData = useContactStore((state) => state.friendList);
-  
-  const data: FriendUserItem[] = rawData.sort((a: FriendUserItem, b: FriendUserItem) => a.friendInfo.nickname.localeCompare(b.friendInfo.nickname));
+  const data: FriendUserItem[] = rawData.sort((a: FriendUserItem, b: FriendUserItem) => a.nickname.localeCompare(b.nickname));
   useEffect(() => {
     const hints: string[] = Array.from(new Set(data.map((item: FriendUserItem) => {
-      const firstChar = item.friendInfo.nickname.charAt(0).toUpperCase();
+      const firstChar = item.nickname.charAt(0).toUpperCase();
       return firstChar.match(/[A-Z]/) ? firstChar : '#';
     })));
     const modifiedHints = hints.splice(hints.indexOf("#"), 1)
@@ -45,7 +46,7 @@ const ContactListPage = () => {
       let hasNonAlphabet = false;
 
       contacts.forEach((contact) => {
-        let firstChar = contact.friendInfo.nickname.charAt(0).toUpperCase();
+        let firstChar = contact.nickname.charAt(0).toUpperCase();
 
         if (!firstChar.match(/[A-Z]/)) {
           firstChar = '#';
@@ -91,33 +92,18 @@ const ContactListPage = () => {
     setContactSections([{
       title: '',
       data: [{
-        "blackInfo": null,
-        "friendInfo": {
           "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "New Friend", "nickname": "New Friend", "operatorUserID": "4458656648",
           "ownerUserID": "6960562805", "remark": "", "userID": "newFriend"
-        },
-        "publicInfo": null,
-        offset: 0
       }, {
-        "blackInfo": null,
-        "friendInfo": {
           "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "New Group", "nickname": "New Group", "operatorUserID": "4458656648",
           "ownerUserID": "6960562805", "remark": "", "userID": "newGroup"
-        },
-        "publicInfo": null,
-        offset: 0
       },
       ],
     }, {
       title: ' ',
       data: [{
-        "blackInfo": null,
-        "friendInfo": {
           "addSource": 2, "attachedInfo": "", "createTime": 1694072100, "ex": "", "faceURL": "My Groups", "nickname": "My Groups", "operatorUserID": "4458656648",
           "ownerUserID": "6960562805", "remark": "", "userID": "myGroup"
-        },
-        "publicInfo": null,
-        offset: 2,
       }],
     },
     ...sectionsWithOffset]);
@@ -180,7 +166,7 @@ const ContactListPage = () => {
         }
         bounces={false}
         renderItem={({ item }) => {
-          return (<NameCards item={item}></NameCards>);
+          return (<ContactCard nickname={item.nickname} faceURL={item.faceURL} userID={item.userID}></ContactCard>);
         }}
         renderSectionHeader={({ section }) => {
           if (section.title !== '')

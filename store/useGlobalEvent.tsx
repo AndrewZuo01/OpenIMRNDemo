@@ -5,9 +5,10 @@ import { FriendUserItem, WSEvent } from "./type.d";
 import { useConversationStore } from "./conversation";
 import { ExMessageItem, useMessageStore } from "./message";
 import { MessageType } from "./types/enum";
-import { RevokedInfo } from "./types/entity";
+import { FriendApplicationItem, RevokedInfo } from "./types/entity";
+import { useUserStore } from "./user";
 export const initStore = () => {
-    // const { getSelfInfoByReq } = useUserStore.getState();
+    const { getSelfInfoByReq } = useUserStore.getState();
     const {
         getFriendListByReq,
         //   getBlackListByReq,
@@ -22,7 +23,7 @@ export const initStore = () => {
 
     getConversationListByReq();
     getUnReadCountByReq();
-    // getSelfInfoByReq();
+    getSelfInfoByReq();
     getFriendListByReq();
     // getBlackListByReq();
     // getGroupListByReq();
@@ -41,7 +42,7 @@ export function useGlobalEvent() {
         };
     }, []);
 
-    const eventNames = ['OnSelfInfoUpdated', 'OnConnecting', 'OnConnectFailed', 'OnConnectSuccess', 'OnKickedOffline', 'OnUserTokenExpired', 'OnSyncServerStart', 'OnSyncServerFinish', 'OnSyncServerFailed', 'OnRecvNewMessage', 'OnRecvNewMessages', 'OnNewRecvMessageRevoked', 'OnConversationChanged', 'OnNewConversation', 'OnTotalUnreadMessageCountChanged', 'OnFriendInfoChanged', 'OnFriendAdded', 'OnFriendDeleted', 'OnBlackAdded', 'OnBlackDeleted', 'OnJoinedGroupAdded', 'OnJoinedGroupDeleted', 'OnGroupInfoChanged', 'OnGroupMemberAdded', 'OnGroupMemberDeleted', 'OnGroupMemberInfoChanged', 'OnFriendApplicationAdded', 'OnFriendApplicationAccepted', 'OnFriendApplicationRejected', 'OnGroupApplicationAdded', 'OnGroupApplicationAccepted', 'OnGroupApplicationRejected'];
+    const eventNames = ['onSelfInfoUpdated', 'onConnecting', 'onConnectFailed', 'onConnectSuccess', 'onKickedOffline', 'onUserTokenExpired', 'onSyncServerStart', 'onSyncServerFinish', 'onSyncServerFailed', 'onRecvNewMessage', 'onRecvNewMessages', 'onNewRecvMessageRevoked', 'onConversationChanged', 'onNewConversation', 'onTotalUnreadMessageCountChanged', 'onFriendInfoChanged', 'onFriendAdded', 'onFriendDeleted', 'onBlackAdded', 'onBlackDeleted', 'onJoinedGroupAdded', 'onJoinedGroupDeleted', 'onGroupInfoChanged', 'onGroupMemberAdded', 'onGroupMemberDeleted', 'onGroupMemberInfoChanged', 'onFriendApplicationAdded', 'onFriendApplicationAccepted', 'onFriendApplicationRejected', 'onGroupApplicationAdded', 'onGroupApplicationAccepted', 'onGroupApplicationRejected'];
     const [connectState, setConnectState] = useState({
         isSyncing: false,
         isLogining: false,
@@ -63,8 +64,8 @@ export function useGlobalEvent() {
     // const pushNewBlack = useContactStore((state) => state.pushNewBlack);
     // const updateGroup = useContactStore((state) => state.updateGroup);
     // const pushNewGroup = useContactStore((state) => state.pushNewGroup);
-    // const updateRecvFriendApplication = useContactStore((state) => state.updateRecvFriendApplication);
-    // const updateSendFriendApplication = useContactStore((state) => state.updateSendFriendApplication);
+    const updateRecvFriendApplication = useContactStore((state) => state.updateRecvFriendApplication);
+    const updateSendFriendApplication = useContactStore((state) => state.updateSendFriendApplication);
     // const updateRecvGroupApplication = useContactStore((state) => state.updateRecvGroupApplication);
     // const updateSendGroupApplication = useContactStore((state) => state.updateSendGroupApplication);
 
@@ -117,7 +118,7 @@ export function useGlobalEvent() {
 
     const friendInfoChangeHandler = ({ data }: WSEvent<FriendUserItem>) => updateFriend(data);
     const friendAddedHandler = ({ data }: WSEvent<FriendUserItem>) => pushNewFriend(data);
-    // const friendDeletedHandler = ({ data }: WSEvent<FriendUserItem>) => updateFriend(data, true);
+    const friendDeletedHandler = ({ data }: WSEvent<FriendUserItem>) => updateFriend(data, true);
 
     // const blackAddedHandler = ({ data }: WSEvent<BlackUserItem>) => pushNewBlack(data);
     // const blackDeletedHandler = ({ data }: WSEvent<BlackUserItem>) => updateBlack(data, true);
@@ -150,10 +151,10 @@ export function useGlobalEvent() {
 
     // const groupMemberInfoChangedHandler = ({ data }: WSEvent<GroupMemberItem>) => tryUpdateCurrentMemberInGroup(data);
 
-    // const friendApplicationProcessedHandler = ({ data }: WSEvent<FriendApplicationItem>) => {
-    //     const isRecv = data.toUserID === useUserStore.getState().selfInfo.userID;
-    //     isRecv ? updateRecvFriendApplication(data) : updateSendFriendApplication(data);
-    // };
+    const friendApplicationProcessedHandler = ({ data }: WSEvent<FriendApplicationItem>) => {
+        const isRecv = data.toUserID === useUserStore.getState().selfInfo.userID;
+        isRecv ? updateRecvFriendApplication(data) : updateSendFriendApplication(data);
+    };
 
     // const groupApplicationProcessedHandler = ({ data }: WSEvent<GroupApplicationItem>) => {
     //     const isRecv = data.userID !== useUserStore.getState().selfInfo.userID;
@@ -164,12 +165,12 @@ export function useGlobalEvent() {
     const setIMListener = () => {
         
         // account
-        // OpenIMEmitter.addListener('OnSelfInfoUpdated', (v) => { selfUpdateHandler });
+        // OpenIMEmitter.addListener('onSelfInfoUpdated', (v) => { selfUpdateHandler });
         OpenIMEmitter.addListener('onConnecting', connectingHandler);
         OpenIMEmitter.addListener('onConnectFailed', connectFailedHandler);
         OpenIMEmitter.addListener('onConnectSuccess', connectSuccessHandler);
-        // OpenIMEmitter.addListener('OnKickedOffline', (v) => { kickHandler });
-        // OpenIMEmitter.addListener('OnUserTokenExpired', (v) => { expiredHandler });
+        // OpenIMEmitter.addListener('onKickedOffline', (v) => { kickHandler });
+        // OpenIMEmitter.addListener('onUserTokenExpired', (v) => { expiredHandler });
         // sync
         OpenIMEmitter.addListener('onSyncServerStart', syncStartHandler );
         OpenIMEmitter.addListener('onSyncServerFinish', syncFinishHandler );
@@ -179,30 +180,30 @@ export function useGlobalEvent() {
         OpenIMEmitter.addListener('onRecvNewMessages',  newMessageHandler );
         OpenIMEmitter.addListener('onNewRecvMessageRevoked',revokedMessageHandler );
         // // conversation
-        // OpenIMEmitter.addListener('OnConversationChanged', (v) => { conversationChnageHandler });
-        // OpenIMEmitter.addListener('OnNewConversation', (v) => { newConversationHandler });
-        // OpenIMEmitter.addListener('OnTotalUnreadMessageCountChanged', (v) => { totalUnreadChangeHandler });
+        // OpenIMEmitter.addListener('onConversationChanged', (v) => { conversationChnageHandler });
+        // OpenIMEmitter.addListener('onNewConversation', (v) => { newConversationHandler });
+        // OpenIMEmitter.addListener('onTotalUnreadMessageCountChanged', (v) => { totalUnreadChangeHandler });
         // // friend
         OpenIMEmitter.addListener('onFriendInfoChanged',  friendInfoChangeHandler );
         OpenIMEmitter.addListener('onFriendAdded', friendAddedHandler );
-        // OpenIMEmitter.addListener('OnFriendDeleted', (v) => { friendDeletedHandler });
+        // OpenIMEmitter.addListener('onFriendDeleted', (v) => { friendDeletedHandler });
         // // blacklist
-        // OpenIMEmitter.addListener('OnBlackAdded', (v) => { blackAddedHandler });
-        // OpenIMEmitter.addListener('OnBlackDeleted', (v) => { blackDeletedHandler });
+        // OpenIMEmitter.addListener('onBlackAdded', (v) => { blackAddedHandler });
+        // OpenIMEmitter.addListener('onBlackDeleted', (v) => { blackDeletedHandler });
         // // group
-        // OpenIMEmitter.addListener('OnJoinedGroupAdded', (v) => { joinedGroupAddedHandler });
-        // OpenIMEmitter.addListener('OnJoinedGroupDeleted', (v) => { joinedGroupDeletedHandler });
-        // OpenIMEmitter.addListener('OnGroupInfoChanged', (v) => { groupInfoChangedHandler });
-        // OpenIMEmitter.addListener('OnGroupMemberAdded', (v) => { groupMemberAddedHandler });
-        // OpenIMEmitter.addListener('OnGroupMemberDeleted', (v) => { groupMemberDeletedHandler });
-        // OpenIMEmitter.addListener('OnGroupMemberInfoChanged', (v) => { groupMemberInfoChangedHandler });
+        // OpenIMEmitter.addListener('onJoinedGroupAdded', (v) => { joinedGroupAddedHandler });
+        // OpenIMEmitter.addListener('onJoinedGroupDeleted', (v) => { joinedGroupDeletedHandler });
+        // OpenIMEmitter.addListener('onGroupInfoChanged', (v) => { groupInfoChangedHandler });
+        // OpenIMEmitter.addListener('onGroupMemberAdded', (v) => { groupMemberAddedHandler });
+        // OpenIMEmitter.addListener('onGroupMemberDeleted', (v) => { groupMemberDeletedHandler });
+        // OpenIMEmitter.addListener('onGroupMemberInfoChanged', (v) => { groupMemberInfoChangedHandler });
         // // application
-        // OpenIMEmitter.addListener('OnFriendApplicationAdded', (v) => { friendApplicationProcessedHandler });
-        // OpenIMEmitter.addListener('OnFriendApplicationAccepted', (v) => { friendApplicationProcessedHandler });
-        // OpenIMEmitter.addListener('OnFriendApplicationRejected', (v) => { friendApplicationProcessedHandler });
-        // OpenIMEmitter.addListener('OnGroupApplicationAdded', (v) => { groupApplicationProcessedHandler });
-        // OpenIMEmitter.addListener('OnGroupApplicationAccepted', (v) => { groupApplicationProcessedHandler });
-        // OpenIMEmitter.addListener('OnGroupApplicationRejected', (v) => { groupApplicationProcessedHandler });
+        OpenIMEmitter.addListener('onFriendApplicationAdded',  friendApplicationProcessedHandler );
+        OpenIMEmitter.addListener('onFriendApplicationAccepted',  friendApplicationProcessedHandler );
+        OpenIMEmitter.addListener('onFriendApplicationRejected', friendApplicationProcessedHandler );
+        // OpenIMEmitter.addListener('onGroupApplicationAdded', (v) => { groupApplicationProcessedHandler });
+        // OpenIMEmitter.addListener('onGroupApplicationAccepted', (v) => { groupApplicationProcessedHandler });
+        // OpenIMEmitter.addListener('onGroupApplicationRejected', (v) => { groupApplicationProcessedHandler });
     };
 
     const disposeIMListener = () => {
